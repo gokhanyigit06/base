@@ -1,14 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 
 export function FeatureSection() {
     const [isVideoOpen, setIsVideoOpen] = useState(false);
+    const [videoUrl, setVideoUrl] = useState("https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
 
-    // Sample abstract video URL
-    const videoUrl = "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4";
+    useEffect(() => {
+        const fetchVideo = async () => {
+            const { data } = await supabase
+                .from('site_settings')
+                .select('value')
+                .eq('key', 'homepage_video_url')
+                .single();
+
+            if (data?.value) {
+                setVideoUrl(data.value);
+            }
+        };
+        fetchVideo();
+    }, []);
 
     return (
         <>

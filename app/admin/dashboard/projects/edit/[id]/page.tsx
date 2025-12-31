@@ -1,0 +1,335 @@
+"use client";
+
+import { useState, useEffect, use } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { ImagePlus, Save, Loader2, Trash2 } from "lucide-react";
+import Image from "next/image";
+import imageCompression from "browser-image-compression";
+
+export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
+    const router = useRouter();
+    const [loading, setLoading] = useState(true); // Start loading true to fetch
+    const [submitting, setSubmitting] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState("");
+
+    // Form State
+    const [formData, setFormData] = useState({
+        title: "",
+        slug: "",
+        category: "",
+        client: "",
+        year: new Date().getFullYear().toString(),
+        services: "",
+        description: "",
+        subheading: "",
+        cover_image: "",
+        is_featured: false
+    });
+
+    // Content Blocks State
+    const [contentBlocks, setContentBlocks] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchProject = async () => {
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error(error);
+                alert("Error fetching project");
+                router.push('/admin/dashboard');
+                return;
+            }
+
+            if (data) {
+                setFormData({
+                    title: data.title || "",
+                    slug: data.slug || "",
+                    category: data.category || "",
+                    client: data.client || "",
+                    year: data.year || "",
+                    services: data.services || "",
+                    description: data.description || "",
+                    subheading: data.subheading || "",
+                    cover_image: data.cover_image || "",
+                    is_featured: data.is_featured || false
+                });
+                setContentBlocks(data.content || []);
+            }
+            setLoading(false);
+        };
+
+        fetchProject();
+    }, [id, router]);
+
+
+    // Handle Image Upload
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isCover: boolean = false, blockIndex: number = -1, itemIndex: number = -1) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+
+        const originalFile = e.target.files[0];
+        setUploading(true);
+        setUploadStatus("Optimizing...");
+
+        // Separate Logic for Images vs Videos
+        let fileToUpload = originalFile;
+        const isImage = originalFile.type.startsWith('image/');
+
+        if (isImage) {
+            try {
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
+                    fileType: originalFile.type
+                };
+                const compressedFile = await imageCompression(originalFile, options);
+                fileToUpload = compressedFile;
+            } catch (error) {
+                console.error("Compression failed, using original file.", error);
+            }
+        }
+
+        setUploadStatus("Uploading...");
+
+        const fileExt = originalFile.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        try {
+            const { error: uploadError } = await supabase.storage.from('project-assets').upload(filePath, fileToUpload);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+
+            if (isCover) {
+                setFormData({ ...formData, cover_image: publicUrl });
+            } else if (blockIndex !== -1) {
+                const newBlocks = [...contentBlocks];
+                if (itemIndex !== -1) {
+                    newBlocks[blockIndex].items[itemIndex].src = publicUrl;
+                } else {
+                    newBlocks[blockIndex].src = publicUrl;
+                }
+                setContentBlocks(newBlocks);
+            }
+
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Error uploading image');
+        } finally {
+            setUploading(false);
+            setUploadStatus("");
+        }
+    };
+
+    // Add Content Block
+    const addBlock = (type: 'full' | 'row') => {
+        if (type === 'full') {
+            setContentBlocks([...contentBlocks, { type: 'full', mediaType: 'image', src: '', text: '' }]);
+        } else {
+            setContentBlocks([...contentBlocks, { type: 'row', items: [{ mediaType: 'image', src: '' }, { mediaType: 'image', src: '' }] }]);
+        }
+    };
+
+    // Remove Block
+    const removeBlock = (index: number) => {
+        const newBlocks = contentBlocks.filter((_, i) => i !== index);
+        setContentBlocks(newBlocks);
+    };
+
+    // Save Project
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitting(true);
+
+        const finalSlug = formData.slug || formData.title.toLowerCase().replace(/ /g, '-');
+
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .update({
+                    ...formData,
+                    slug: finalSlug,
+                    content: contentBlocks
+                })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            alert("Project Updated Successfully!");
+            router.push('/admin/dashboard');
+
+        } catch (error: any) {
+            console.error('Error updating project:', error);
+            alert('Error updating project: ' + error.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+
+    return (
+        <div className="max-w-5xl mx-auto pb-24">
+            <h1 className="text-3xl font-oswald font-bold uppercase mb-8 text-white">Edit Project</h1>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-12">
+
+                {/* 1. Basic Info Section */}
+                <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 flex flex-col gap-6">
+                    <h2 className="text-xl font-bold text-brand-yellow uppercase tracking-widest">Basic Information</h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs uppercase text-gray-500">Project Title</label>
+                            <input required type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white focus:border-brand-yellow" placeholder="e.g. OneOff" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs uppercase text-gray-500">Slug (URL)</label>
+                            <input type="text" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white focus:border-brand-yellow" placeholder="e.g. one-off (optional)" />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-black border border-zinc-700 p-4 rounded-lg">
+                        <input
+                            type="checkbox"
+                            id="is_featured"
+                            checked={formData.is_featured}
+                            onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                            className="w-5 h-5 accent-brand-yellow cursor-pointer"
+                        />
+                        <label htmlFor="is_featured" className="text-white text-sm font-bold uppercase cursor-pointer select-none">
+                            Feature on Homepage
+                        </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs uppercase text-gray-500">Client</label>
+                            <input required type="text" value={formData.client} onChange={(e) => setFormData({ ...formData, client: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs uppercase text-gray-500">Year</label>
+                            <input type="text" value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white" />
+                        </div>
+                        <div className="flex flex-col gap-2 md:col-span-2">
+                            <label className="text-xs uppercase text-gray-500">Category</label>
+                            <input required type="text" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white" placeholder="e.g. BRANDING, WEB" />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs uppercase text-gray-500">Services List</label>
+                        <input type="text" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white" placeholder="e.g. Strategy, UI/UX, Development" />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs uppercase text-gray-500">Description</label>
+                        <textarea required rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="bg-black border border-zinc-700 p-3 rounded text-white" />
+                    </div>
+                </div>
+
+                {/* 2. Cover Image */}
+                <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 flex flex-col gap-6">
+                    <h2 className="text-xl font-bold text-brand-yellow uppercase tracking-widest">Cover Image</h2>
+                    <div className="flex items-center gap-6">
+                        <div className="w-64 aspect-video bg-black border border-zinc-700 rounded-lg overflow-hidden flex items-center justify-center relative group">
+                            {formData.cover_image ? (
+                                <Image src={formData.cover_image} alt="Cover" fill className="object-cover" />
+                            ) : (
+                                <span className="text-gray-600 text-xs uppercase">No Image</span>
+                            )}
+                            {uploading && <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
+                                <Loader2 className="w-6 h-6 animate-spin text-brand-yellow" />
+                                <span className="text-xs text-brand-yellow font-bold uppercase tracking-widest">{uploadStatus}</span>
+                            </div>}
+                        </div>
+                        <label className="bg-white text-black px-4 py-2 rounded cursor-pointer font-bold uppercase text-sm hover:bg-gray-200 transition-colors">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, true)} />
+                            Upload Cover
+                        </label>
+                    </div>
+                </div>
+
+                {/* 3. Content Blocks Builder */}
+                <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 flex flex-col gap-6">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-brand-yellow uppercase tracking-widest">Content Blocks</h2>
+                        <div className="flex gap-2">
+                            <button type="button" onClick={() => addBlock('full')} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1 rounded text-xs uppercase font-bold border border-zinc-700">
+                                + Full Width
+                            </button>
+                            <button type="button" onClick={() => addBlock('row')} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1 rounded text-xs uppercase font-bold border border-zinc-700">
+                                + 2 Columns
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        {contentBlocks.map((block, index) => (
+                            <div key={index} className="bg-black border border-zinc-800 p-4 rounded-xl relative group">
+                                <button type="button" onClick={() => removeBlock(index)} className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+
+                                {block.type === 'full' ? (
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs text-gray-500 uppercase font-bold">Full Width Block</span>
+                                        <div className="h-32 bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden">
+                                            {block.src && (block.src.includes('.mp4') ? <video src={block.src} className="w-full h-full object-cover" /> : <img src={block.src} className="w-full h-full object-cover" />)}
+                                            <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                                                <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index)} />
+                                                {!block.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                            </label>
+                                            {uploading && <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
+                                                <Loader2 className="w-6 h-6 animate-spin text-brand-yellow" />
+                                                <span className="text-xs text-brand-yellow font-bold uppercase tracking-widest">{uploadStatus}</span>
+                                            </div>}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs text-gray-500 uppercase font-bold">2 Column Row</span>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {block.items.map((item: any, i: number) => (
+                                                <div key={i} className="h-32 bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden">
+                                                    {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
+                                                    <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                                                        <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
+                                                        {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                        {contentBlocks.length === 0 && (
+                            <div className="text-center py-8 text-gray-600 italic text-sm border-2 border-dashed border-zinc-800 rounded-xl">
+                                No contents yet. Add blocks above.
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Submit Action */}
+                <div className="sticky bottom-6 flex justify-end">
+                    <button disabled={submitting} className="bg-brand-yellow text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest shadow-xl hover:bg-white transition-colors flex items-center gap-2">
+                        {submitting && <Loader2 className="w-5 h-5 animate-spin" />}
+                        {submitting ? 'Updating...' : 'Update Project'}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    );
+}

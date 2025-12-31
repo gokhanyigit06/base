@@ -101,7 +101,7 @@ export default function DashboardPage() {
                                     <td className="p-6 font-bold text-white">{p.title}</td>
                                     <td className="p-6 text-gray-400 font-mono text-sm">{p.category}</td>
                                     <td className="p-6 text-right">
-                                        <button className="text-gray-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider underline">Edit</button>
+                                        <Link href={`/admin/dashboard/projects/edit/${p.id}`} className="text-gray-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider underline">Edit</Link>
                                     </td>
                                 </tr>
                             ))}

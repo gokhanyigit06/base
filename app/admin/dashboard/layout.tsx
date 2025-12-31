@@ -9,7 +9,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const menu = [
         { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-        { title: "Projects", href: "/admin/dashboard/projects", icon: Package },
+
         { title: "New Project", href: "/admin/dashboard/projects/new", icon: FolderPlus },
         { title: "Settings", href: "/admin/dashboard/settings", icon: Settings },
     ];

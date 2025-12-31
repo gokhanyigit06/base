@@ -96,57 +96,107 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                 </div>
             ) : (
                 <>
-                    {/* Hero Section */}
-                    <section className="relative h-[80vh] flex flex-col justify-end px-6 md:px-12 pb-12 pt-32">
-                        <motion.div style={{ y: titleParallax }} className="flex flex-col gap-4">
-                            <div className="flex flex-wrap gap-4 mb-4">
-                                {project.category && project.category.split(',').map((tag: string, i: number) => (
-                                    <span key={i} className="px-4 py-1 rounded-full border border-black/20 text-sm font-bold tracking-widest uppercase">
-                                        {tag.trim()}
-                                    </span>
-                                ))}
-                            </div>
-                            <h1 className="text-[12vw] leading-[0.8] font-bold font-oswald uppercase tracking-tighter">
-                                {project.title}
+                    {/* Cover Image Section */}
+                    <section className="w-full px-6 md:px-12 pt-32 pb-8">
+                        <div className="relative w-full aspect-video md:aspect-[2.4/1] rounded-[2rem] overflow-hidden bg-zinc-100">
+                            {project.cover_image && (
+                                <Image
+                                    src={project.cover_image}
+                                    alt={project.title}
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                />
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Title & Info Section */}
+                    <section className="px-6 md:px-12 pb-12">
+                        {/* Header */}
+                        <div className="flex flex-col gap-2 mb-8">
+                            <span className="font-mono text-sm font-bold tracking-widest uppercase">Project</span>
+                            <h1 className="text-4xl md:text-7xl font-bold font-oswald uppercase tracking-tighter leading-none">
+                                {project.title} <span className="font-light text-gray-400 mx-2">|</span> {project.category}
                             </h1>
-                        </motion.div>
-                    </section>
+                        </div>
 
-                    {/* Project Details Bar */}
-                    <section className="border-y border-black/10 px-6 md:px-12 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 font-mono text-sm uppercase tracking-wider text-gray-500">
-                        <div className="flex flex-col gap-2">
-                            <span className="text-black font-bold">Client</span>
-                            <span>{project.client}</span>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <span className="text-black font-bold">Services</span>
-                            <span>{project.services}</span>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <span className="text-black font-bold">Year</span>
-                            <span>{project.year}</span>
-                        </div>
-                        <div className="flex flex-col gap-2 justify-end items-start md:items-end">
-                            <a href="#" className="flex items-center gap-2 text-black hover:text-brand-purple transition-colors font-bold group">
-                                Visit Live Site <ArrowUpRight className="w-4 h-4 group-hover:rotate-45 transition-transform" />
-                            </a>
-                        </div>
-                    </section>
+                        {/* Divider */}
+                        <div className="w-full h-px bg-black mb-12"></div>
 
-                    {/* Content Area */}
-                    <section className="flex flex-col gap-6 md:gap-12 px-6 md:px-12 py-12 md:py-24">
+                        {/* Details Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-12 gap-x-8">
 
-                        {/* Intro Text */}
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
-                            <div className="md:col-span-8 md:col-start-3 text-center">
-                                <h3 className="text-2xl md:text-4xl font-bold font-oswald uppercase mb-6">{project.subheading}</h3>
-                                <p className="font-sans text-lg text-gray-600 leading-relaxed">
-                                    {project.description}
-                                </p>
+                            {/* Left Meta Section (Span 6) */}
+                            <div className="lg:col-span-5 grid grid-cols-2 lg:grid-cols-3 gap-8">
+
+                                {/* Col 1: Client & Client Type */}
+                                <div className="flex flex-col gap-8">
+                                    <div className="flex flex-col gap-1">
+                                        <h4 className="font-oswald font-bold uppercase text-lg">Client</h4>
+                                        <p className="text-sm text-gray-600 leading-snug">{project.client}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <h4 className="font-oswald font-bold uppercase text-lg">Client Type</h4>
+                                        <p className="text-sm text-gray-600 leading-snug">{project.category}</p>
+                                    </div>
+                                </div>
+
+                                {/* Col 2: Market & Website */}
+                                <div className="flex flex-col gap-8">
+                                    <div className="flex flex-col gap-1">
+                                        <h4 className="font-oswald font-bold uppercase text-lg">Year</h4>
+                                        <p className="text-sm text-gray-600 leading-snug">{project.year}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <h4 className="font-oswald font-bold uppercase text-lg">Website</h4>
+                                        <a href="#" className="text-sm text-black underline underline-offset-4 decoration-1 font-medium hover:text-brand-yellow transition-colors">
+                                            layersup.com
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {/* Col 3: Services */}
+                                <div className="flex flex-col gap-1 col-span-2 lg:col-span-1">
+                                    <h4 className="font-oswald font-bold uppercase text-lg mb-2">Services</h4>
+                                    <ul className="flex flex-col gap-2 text-sm text-gray-600 leading-snug">
+                                        {project.services && project.services.split(',').map((service: string, i: number) => (
+                                            <li key={i} className="flex items-center gap-2">
+                                                {i === 2 && <span className="w-2 h-2 rounded-full bg-brand-purple shrink-0"></span>}
+                                                <span>{service.trim()}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Spacer */}
+                            <div className="hidden lg:block lg:col-span-1"></div>
+
+                            {/* Right Column: The Case (Span 6) */}
+                            <div className="lg:col-span-6 flex flex-col gap-8">
+                                <h2 className="text-6xl md:text-7xl font-oswald font-bold uppercase tracking-tighter leading-none">The Case</h2>
+                                <div className="text-base md:text-lg text-gray-500 font-light leading-relaxed space-y-6">
+                                    <p>
+                                        {project.description}
+                                    </p>
+                                    {/* Additional paragraph simulation for design match if description is short */}
+                                    <p>
+                                        The main objective was to clearly convey the core principles of the company which revolves around 'time-saving' and 'employee happiness'.
+                                    </p>
+                                </div>
+
+                                <div className="pt-4">
+                                    <button className="border border-black/20 rounded-full px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors flex items-center gap-2">
+                                        Read More <ArrowUpRight className="w-3 h-3" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    </section>
 
-                        {/* Dynamic Content Blocks */}
+                    {/* Content Area - Media Blocks */}
+                    <section className="flex flex-col gap-6 md:gap-12 px-6 md:px-12 py-12 md:py-24">
                         {project.content && project.content.map((block: any, index: number) => {
                             if (block.type === 'full') {
                                 return (
@@ -166,7 +216,6 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                                 );
                             }
                         })}
-
                     </section>
 
                     {/* Conclusion */}
@@ -198,5 +247,4 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
             <SiteFooter />
         </main >
     );
-
 }

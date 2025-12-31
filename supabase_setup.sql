@@ -55,3 +55,28 @@ create policy "Allow public delete in project-assets"
 
 -- 8. Add 'is_featured' column for Homepage Selection
 alter table projects add column is_featured boolean default false;
+
+-- Create Site Settings Table
+create table site_settings (
+    key text primary key,
+    value text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS
+alter table site_settings enable row level security;
+
+create policy "Enable read access for all users"
+on "public"."site_settings"
+as permissive
+for select
+to public
+using (true);
+
+create policy "Enable insert/update for anon (for dev only - restrict in prod)"
+on "public"."site_settings"
+as permissive
+for all
+to anon
+using (true)
+with check (true);

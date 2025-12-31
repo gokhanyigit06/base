@@ -11,7 +11,7 @@ export default function Home() {
       <SiteHeader />
 
       {/* New Hero Section: The Future Has Arrived */}
-      <div className="pt-24 min-h-[calc(100vh-6rem)] flex items-center">
+      <div className="min-h-screen flex items-center">
         <FeatureSection />
       </div>
 
