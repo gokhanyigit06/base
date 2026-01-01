@@ -69,6 +69,8 @@ export default function SettingsPage() {
         // Cursor
         custom_cursor_url: "",
         custom_cursor_hover_url: "",
+        cursor_size: "32",
+        cursor_hover_size: "32",
 
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
@@ -112,7 +114,9 @@ export default function SettingsPage() {
                     marquee_text: (val: string) => setSettings(prev => ({ ...prev, marquee_text: val })),
                     marquee_speed: (val: string) => setSettings(prev => ({ ...prev, marquee_speed: val })),
                     custom_cursor_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_url: val })),
-                    custom_cursor_hover_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_hover_url: val }))
+                    custom_cursor_hover_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_hover_url: val })),
+                    cursor_size: (val: string) => setSettings(prev => ({ ...prev, cursor_size: val })),
+                    cursor_hover_size: (val: string) => setSettings(prev => ({ ...prev, cursor_hover_size: val }))
                 };
 
                 data.forEach((item: { key: string, value: string }) => {
@@ -443,52 +447,88 @@ export default function SettingsPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Normal State */}
-                        <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
-                            <input
-                                type="file"
-                                accept="image/png, image/svg+xml, .svg"
-                                onChange={handleCursorUpload}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                            />
-                            <div className="flex flex-col items-center justify-center gap-4 relative z-10">
-                                {settings.custom_cursor_url ? (
-                                    <div className="relative w-16 h-16">
-                                        <img src={settings.custom_cursor_url} alt="Custom Cursor" className="w-full h-full object-contain" />
+                        <div className="flex flex-col gap-4">
+                            <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group h-full flex flex-col items-center justify-center">
+                                <input
+                                    type="file"
+                                    accept="image/png, image/svg+xml, .svg"
+                                    onChange={handleCursorUpload}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                />
+                                <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                                    {settings.custom_cursor_url ? (
+                                        <div className="relative w-16 h-16">
+                                            <img src={settings.custom_cursor_url} alt="Custom Cursor" className="w-full h-full object-contain" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
+                                            <ImagePlus className="w-8 h-8 text-gray-500" />
+                                        </div>
+                                    )}
+                                    <div className="text-center">
+                                        <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Normal State</p>
+                                        <p className="text-gray-500 text-xs">Standard cursor icon</p>
                                     </div>
-                                ) : (
-                                    <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
-                                        <ImagePlus className="w-8 h-8 text-gray-500" />
-                                    </div>
-                                )}
-                                <div className="text-center">
-                                    <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Normal State</p>
-                                    <p className="text-gray-500 text-xs">Standard cursor icon</p>
                                 </div>
+                            </div>
+
+                            <div className="bg-black p-4 rounded-xl border border-zinc-800">
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Size (px)</label>
+                                    <span className="text-brand-yellow font-mono text-xs">{settings.cursor_size}px</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="16"
+                                    max="128"
+                                    name="cursor_size"
+                                    value={settings.cursor_size}
+                                    onChange={handleChange}
+                                    className="w-full accent-brand-yellow cursor-pointer"
+                                />
                             </div>
                         </div>
 
                         {/* Hover State */}
-                        <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
-                            <input
-                                type="file"
-                                accept="image/png, image/svg+xml, .svg"
-                                onChange={handleCursorHoverUpload}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                            />
-                            <div className="flex flex-col items-center justify-center gap-4 relative z-10">
-                                {settings.custom_cursor_hover_url ? (
-                                    <div className="relative w-16 h-16">
-                                        <img src={settings.custom_cursor_hover_url} alt="Hover Cursor" className="w-full h-full object-contain" />
+                        <div className="flex flex-col gap-4">
+                            <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group h-full flex flex-col items-center justify-center">
+                                <input
+                                    type="file"
+                                    accept="image/png, image/svg+xml, .svg"
+                                    onChange={handleCursorHoverUpload}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                />
+                                <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                                    {settings.custom_cursor_hover_url ? (
+                                        <div className="relative w-16 h-16">
+                                            <img src={settings.custom_cursor_hover_url} alt="Hover Cursor" className="w-full h-full object-contain" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
+                                            <ImagePlus className="w-8 h-8 text-gray-500" />
+                                        </div>
+                                    )}
+                                    <div className="text-center">
+                                        <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Hover State</p>
+                                        <p className="text-gray-500 text-xs">Icon when hovering links</p>
                                     </div>
-                                ) : (
-                                    <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
-                                        <ImagePlus className="w-8 h-8 text-gray-500" />
-                                    </div>
-                                )}
-                                <div className="text-center">
-                                    <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Hover State</p>
-                                    <p className="text-gray-500 text-xs">Icon when hovering links</p>
                                 </div>
+                            </div>
+
+                            <div className="bg-black p-4 rounded-xl border border-zinc-800">
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Hover Size (px)</label>
+                                    <span className="text-brand-yellow font-mono text-xs">{settings.cursor_hover_size}px</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="16"
+                                    max="192"
+                                    name="cursor_hover_size"
+                                    value={settings.cursor_hover_size}
+                                    onChange={handleChange}
+                                    className="w-full accent-brand-yellow cursor-pointer"
+                                />
                             </div>
                         </div>
                     </div>

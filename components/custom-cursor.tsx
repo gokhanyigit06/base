@@ -10,6 +10,8 @@ export function CustomCursor() {
     const pathname = usePathname();
     const [cursorUrl, setCursorUrl] = useState<string | null>(null);
     const [hoverCursorUrl, setHoverCursorUrl] = useState<string | null>(null);
+    const [cursorSize, setCursorSize] = useState<string>("32");
+    const [hoverCursorSize, setHoverCursorSize] = useState<string>("32");
     const [isVisible, setIsVisible] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
 
@@ -29,12 +31,14 @@ export function CustomCursor() {
             const { data } = await supabase
                 .from('site_settings')
                 .select('key, value')
-                .in('key', ['custom_cursor_url', 'custom_cursor_hover_url']);
+                .in('key', ['custom_cursor_url', 'custom_cursor_hover_url', 'cursor_size', 'cursor_hover_size']);
 
             if (data) {
                 data.forEach(item => {
                     if (item.key === 'custom_cursor_url') setCursorUrl(item.value);
                     if (item.key === 'custom_cursor_hover_url') setHoverCursorUrl(item.value);
+                    if (item.key === 'cursor_size') setCursorSize(item.value);
+                    if (item.key === 'cursor_hover_size') setHoverCursorSize(item.value);
                 });
             }
         };
@@ -72,6 +76,7 @@ export function CustomCursor() {
     if (!cursorUrl) return null;
 
     const currentCursor = (isHovering && hoverCursorUrl) ? hoverCursorUrl : cursorUrl;
+    const currentSize = (isHovering && hoverCursorUrl) ? parseInt(hoverCursorSize) : parseInt(cursorSize);
 
     return (
         <>
@@ -100,10 +105,12 @@ body, a, button, input, select, textarea {
                         animate={{ scale: 1, opacity: 1, rotate: 0 }}
                         exit={{ scale: 0.8, opacity: 0, rotate: 10 }}
                         transition={{ duration: 0.15 }}
-                        className="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] block"
+                        style={{ width: currentSize, height: currentSize }}
+                        className="object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] block"
                     />
                 </AnimatePresence>
             </motion.div>
         </>
     );
 }
+
