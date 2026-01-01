@@ -372,6 +372,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                                                         <span className="text-xs text-gray-500 uppercase font-bold">Aspect Ratio</span>
                                                         <div className="flex gap-2">
                                                             {[
+                                                                { id: 'ultrawide', label: 'Wide' },
                                                                 { id: 'video', label: '16:9' },
                                                                 { id: '3-2', label: '3:2' },
                                                                 { id: 'landscape', label: '4:3' },
@@ -386,7 +387,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                                                                         newBlocks[index] = { ...newBlocks[index], aspectRatio: ratio.id };
                                                                         setContentBlocks(newBlocks);
                                                                     }}
-                                                                    className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.aspectRatio === ratio.id || (!block.aspectRatio && ratio.id === 'video') ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
+                                                                    className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.aspectRatio === ratio.id || (!block.aspectRatio && ratio.id === 'ultrawide') ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
                                                                 >
                                                                     {ratio.label}
                                                                 </button>
@@ -401,7 +402,9 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                                                                     block.aspectRatio === 'portrait' ? 'aspect-[3/4]' :
                                                                         block.aspectRatio === 'landscape' ? 'aspect-[4/3]' :
                                                                             block.aspectRatio === '3-2' ? 'aspect-[3/2]' :
-                                                                                'aspect-video';
+                                                                                block.aspectRatio === 'video' ? 'aspect-video' :
+                                                                                    block.aspectRatio === 'ultrawide' ? 'aspect-[21/9]' :
+                                                                                        'aspect-[21/9]'; // Default
 
                                                             return (
                                                                 <div key={i} className={`${aspectClass} bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item`}>

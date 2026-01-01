@@ -15,7 +15,7 @@ interface ProjectSliderProps {
     aspectRatio?: string;
 }
 
-export function ProjectSlider({ items, aspectRatio = 'video' }: ProjectSliderProps) {
+export function ProjectSlider({ items, aspectRatio = 'ultrawide' }: ProjectSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -52,14 +52,16 @@ export function ProjectSlider({ items, aspectRatio = 'video' }: ProjectSliderPro
 
     if (!items || items.length === 0) return null;
 
-    let aspectClass = 'aspect-video';
+    let aspectClass = 'aspect-[21/9]';
     switch (aspectRatio) {
         case 'square': aspectClass = 'aspect-square'; break;
         case 'portrait': aspectClass = 'aspect-[3/4]'; break;
         case 'landscape': aspectClass = 'aspect-[4/3]'; break;
         case 'tall': aspectClass = 'aspect-[9/16]'; break;
         case '3-2': aspectClass = 'aspect-[3/2]'; break;
-        default: aspectClass = 'aspect-video';
+        case 'video': aspectClass = 'aspect-video'; break;
+        case 'ultrawide': aspectClass = 'aspect-[21/9]'; break;
+        default: aspectClass = 'aspect-[21/9]';
     }
 
     return (
