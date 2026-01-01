@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
 export function CustomCursor() {
     const [cursorUrl, setCursorUrl] = useState<string | null>(null);
+    const [hoverCursorUrl, setHoverCursorUrl] = useState<string | null>(null);
     const [isVisible, setIsVisible] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
 
     const cursorX = useMotionValue(-100);
     const cursorY = useMotionValue(-100);
 
-    const springConfig = { damping: 25, stiffness: 700 };
+    // Increased damping to remove wiggle/oscillation
+    const springConfig = { damping: 50, stiffness: 400 };
     const cursorXSpring = useSpring(cursorX, springConfig);
     const cursorYSpring = useSpring(cursorY, springConfig);
 
@@ -19,12 +22,14 @@ export function CustomCursor() {
         const fetchCursor = async () => {
             const { data } = await supabase
                 .from('site_settings')
-                .select('value')
-                .eq('key', 'custom_cursor_url')
-                .single();
+                .select('key, value')
+                .in('key', ['custom_cursor_url', 'custom_cursor_hover_url']);
 
-            if (data?.value) {
-                setCursorUrl(data.value);
+            if (data) {
+                data.forEach(item => {
+                    if (item.key === 'custom_cursor_url') setCursorUrl(item.value);
+                    if (item.key === 'custom_cursor_hover_url') setHoverCursorUrl(item.value);
+                });
             }
         };
         fetchCursor();
@@ -35,15 +40,24 @@ export function CustomCursor() {
             setIsVisible(true);
         };
 
+        const checkHover = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            // Check if hovering over clickable elements
+            const isClickable = target.closest('a, button, [role="button"], input, select, textarea, .cursor-pointer');
+            setIsHovering(!!isClickable);
+        };
+
         const handleMouseEnter = () => setIsVisible(true);
         const handleMouseLeave = () => setIsVisible(false);
 
         window.addEventListener("mousemove", moveCursor);
+        window.addEventListener("mouseover", checkHover);
         document.body.addEventListener("mouseenter", handleMouseEnter);
         document.body.addEventListener("mouseleave", handleMouseLeave);
 
         return () => {
             window.removeEventListener("mousemove", moveCursor);
+            window.removeEventListener("mouseover", checkHover);
             document.body.removeEventListener("mouseenter", handleMouseEnter);
             document.body.removeEventListener("mouseleave", handleMouseLeave);
         };
@@ -51,17 +65,18 @@ export function CustomCursor() {
 
     if (!cursorUrl) return null;
 
+    const currentCursor = (isHovering && hoverCursorUrl) ? hoverCursorUrl : cursorUrl;
+
     return (
         <>
-            {/* Global Style to hide default cursor when this is active */}
             <style jsx global>{`
-                body, a, button, input {
+                body, a, button, input, select, textarea {
                     cursor: none !important;
                 }
             `}</style>
 
             <motion.div
-                className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference"
+                className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference flex items-center justify-center"
                 style={{
                     x: cursorXSpring,
                     y: cursorYSpring,
@@ -70,12 +85,18 @@ export function CustomCursor() {
                     opacity: isVisible ? 1 : 0,
                 }}
             >
-                {/* Render uploaded cursor */}
-                <img
-                    src={cursorUrl}
-                    alt="cursor"
-                    className="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" // Default size 48px (12 * 4)
-                />
+                <AnimatePresence mode="wait">
+                    <motion.img
+                        key={currentCursor}
+                        src={currentCursor}
+                        alt="cursor"
+                        initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        exit={{ scale: 0.8, opacity: 0, rotate: 10 }}
+                        transition={{ duration: 0.15 }}
+                        className="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] block"
+                    />
+                </AnimatePresence>
             </motion.div>
         </>
     );

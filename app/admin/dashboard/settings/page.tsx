@@ -68,6 +68,7 @@ export default function SettingsPage() {
 
         // Cursor
         custom_cursor_url: "",
+        custom_cursor_hover_url: "",
 
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
@@ -91,23 +92,42 @@ export default function SettingsPage() {
                 .select('key, value');
 
             if (data) {
-                const newSettings: any = { ...settings };
-                let loadedOrder = null;
+                const settingsMap = {
+                    homepage_video_url: (val: string) => setSettings(prev => ({ ...prev, homepage_video_url: val })),
+                    hero_tagline: (val: string) => setSettings(prev => ({ ...prev, hero_tagline: val })),
+                    hero_headline_start: (val: string) => setSettings(prev => ({ ...prev, hero_headline_start: val })),
+                    hero_headline_accent: (val: string) => setSettings(prev => ({ ...prev, hero_headline_accent: val })),
+                    hero_headline_end: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end: val })),
+                    hero_description: (val: string) => setSettings(prev => ({ ...prev, hero_description: val })),
+                    hero_accent_color: (val: string) => setSettings(prev => ({ ...prev, hero_accent_color: val })),
+                    footer_email: (val: string) => setSettings(prev => ({ ...prev, footer_email: val })),
+                    footer_phone: (val: string) => setSettings(prev => ({ ...prev, footer_phone: val })),
+                    footer_address: (val: string) => setSettings(prev => ({ ...prev, footer_address: val })),
+                    footer_copyright: (val: string) => setSettings(prev => ({ ...prev, footer_copyright: val })),
+                    social_instagram: (val: string) => setSettings(prev => ({ ...prev, social_instagram: val })),
+                    social_linkedin: (val: string) => setSettings(prev => ({ ...prev, social_linkedin: val })),
+                    social_twitter: (val: string) => setSettings(prev => ({ ...prev, social_twitter: val })),
+                    social_behance: (val: string) => setSettings(prev => ({ ...prev, social_behance: val })),
+                    works_section_title: (val: string) => setSettings(prev => ({ ...prev, works_section_title: val })),
+                    marquee_text: (val: string) => setSettings(prev => ({ ...prev, marquee_text: val })),
+                    marquee_speed: (val: string) => setSettings(prev => ({ ...prev, marquee_speed: val })),
+                    custom_cursor_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_url: val })),
+                    custom_cursor_hover_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_hover_url: val }))
+                };
 
                 data.forEach((item: { key: string, value: string }) => {
-                    if (Object.keys(newSettings).includes(item.key)) {
-                        newSettings[item.key] = item.value;
+                    if (settingsMap[item.key as keyof typeof settingsMap] && typeof settingsMap[item.key as keyof typeof settingsMap] === 'function') {
+                        // Typescript might complain about function type matching, calling simply:
+                        (settingsMap[item.key as keyof typeof settingsMap] as any)(item.value);
                     }
                     if (item.key === 'hero_elements_order') {
                         try {
-                            loadedOrder = JSON.parse(item.value);
+                            setHeroOrder(JSON.parse(item.value));
                         } catch (e) {
                             console.error("Failed to parse hero order", e);
                         }
                     }
                 });
-                setSettings(newSettings);
-                if (loadedOrder) setHeroOrder(loadedOrder);
             }
             setLoading(false);
         };
@@ -179,6 +199,43 @@ export default function SettingsPage() {
         } catch (error: any) {
             console.error(error);
             alert(`Error uploading cursor: ${error.message || "Unknown error"}`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleCursorHoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `cursor-hover-${Date.now()}.${fileExt}`;
+            const filePath = `site-assets/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('project-assets')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+            const publicUrl = data.publicUrl;
+
+            // Persist immediately
+            const { error: dbError } = await supabase
+                .from('site_settings')
+                .upsert({ key: 'custom_cursor_hover_url', value: publicUrl }, { onConflict: 'key' });
+
+            if (dbError) throw dbError;
+
+            setSettings(prev => ({ ...prev, custom_cursor_hover_url: publicUrl }));
+            alert("Hover Cursor updated successfully!");
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Error uploading hover cursor: ${error.message || "Unknown error"}`);
         } finally {
             setUploading(false);
         }
@@ -384,26 +441,54 @@ export default function SettingsPage() {
                         <h3 className="text-xl font-bold text-white uppercase tracking-wider">Custom Mouse Cursor</h3>
                     </div>
 
-                    <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
-                        <input
-                            type="file"
-                            accept="image/png, image/svg+xml, .svg"
-                            onChange={handleCursorUpload}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                        />
-                        <div className="flex flex-col items-center justify-center gap-4 relative z-10">
-                            {settings.custom_cursor_url ? (
-                                <div className="relative w-16 h-16">
-                                    <img src={settings.custom_cursor_url} alt="Custom Cursor" className="w-full h-full object-contain" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Normal State */}
+                        <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
+                            <input
+                                type="file"
+                                accept="image/png, image/svg+xml, .svg"
+                                onChange={handleCursorUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                            />
+                            <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                                {settings.custom_cursor_url ? (
+                                    <div className="relative w-16 h-16">
+                                        <img src={settings.custom_cursor_url} alt="Custom Cursor" className="w-full h-full object-contain" />
+                                    </div>
+                                ) : (
+                                    <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
+                                        <ImagePlus className="w-8 h-8 text-gray-500" />
+                                    </div>
+                                )}
+                                <div className="text-center">
+                                    <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Normal State</p>
+                                    <p className="text-gray-500 text-xs">Standard cursor icon</p>
                                 </div>
-                            ) : (
-                                <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
-                                    <ImagePlus className="w-8 h-8 text-gray-500" />
+                            </div>
+                        </div>
+
+                        {/* Hover State */}
+                        <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
+                            <input
+                                type="file"
+                                accept="image/png, image/svg+xml, .svg"
+                                onChange={handleCursorHoverUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                            />
+                            <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                                {settings.custom_cursor_hover_url ? (
+                                    <div className="relative w-16 h-16">
+                                        <img src={settings.custom_cursor_hover_url} alt="Hover Cursor" className="w-full h-full object-contain" />
+                                    </div>
+                                ) : (
+                                    <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
+                                        <ImagePlus className="w-8 h-8 text-gray-500" />
+                                    </div>
+                                )}
+                                <div className="text-center">
+                                    <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Hover State</p>
+                                    <p className="text-gray-500 text-xs">Icon when hovering links</p>
                                 </div>
-                            )}
-                            <div className="text-center">
-                                <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Upload Cursor Icon</p>
-                                <p className="text-gray-500 text-xs">Recommended: 32x32px or 48x48px PNG/SVG</p>
                             </div>
                         </div>
                     </div>
