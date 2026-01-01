@@ -17,7 +17,7 @@ export function WorksSection() {
                 .from('projects')
                 .select('*')
                 .eq('is_featured', true)
-                .order('created_at', { ascending: false });
+                .order('display_order', { ascending: true });
 
             if (projects) setFeaturedProjects(projects);
 
