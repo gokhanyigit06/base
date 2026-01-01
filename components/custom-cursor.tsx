@@ -1,10 +1,13 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
 export function CustomCursor() {
+    const pathname = usePathname();
     const [cursorUrl, setCursorUrl] = useState<string | null>(null);
     const [hoverCursorUrl, setHoverCursorUrl] = useState<string | null>(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -17,6 +20,9 @@ export function CustomCursor() {
     const springConfig = { damping: 50, stiffness: 400 };
     const cursorXSpring = useSpring(cursorX, springConfig);
     const cursorYSpring = useSpring(cursorY, springConfig);
+
+    // If pathname starts with /admin, return null to disable custom cursor
+    if (pathname?.startsWith('/admin')) return null;
 
     useEffect(() => {
         const fetchCursor = async () => {
@@ -70,10 +76,10 @@ export function CustomCursor() {
     return (
         <>
             <style jsx global>{`
-                body, a, button, input, select, textarea {
-                    cursor: none !important;
-                }
-            `}</style>
+body, a, button, input, select, textarea {
+    cursor: none!important;
+}
+`}</style>
 
             <motion.div
                 className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference flex items-center justify-center"
