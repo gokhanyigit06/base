@@ -7,21 +7,43 @@ import { supabase } from "@/lib/supabase";
 
 export function FeatureSection() {
     const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+    // Dynamic Content State
     const [videoUrl, setVideoUrl] = useState("https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
+    const [tagline, setTagline] = useState("Look Ahead");
+    const [headlineStart, setHeadlineStart] = useState("THE");
+    const [headlineAccent, setHeadlineAccent] = useState("future");
+    const [headlineEnd, setHeadlineEnd] = useState("HAS ARRIVED.");
+    const [description, setDescription] = useState("Awarded Branding & Web Design Agency.");
+    const [accentColor, setAccentColor] = useState("#CCF000");
 
     useEffect(() => {
-        const fetchVideo = async () => {
+        const fetchSettings = async () => {
             const { data } = await supabase
                 .from('site_settings')
-                .select('value')
-                .eq('key', 'homepage_video_url')
-                .single();
+                .select('key, value');
 
-            if (data?.value) {
-                setVideoUrl(data.value);
+            if (data) {
+                // Map settings to state
+                const settingsMap: Record<string, (value: string) => void> = {
+                    homepage_video_url: setVideoUrl,
+                    hero_tagline: setTagline,
+                    hero_headline_start: setHeadlineStart,
+                    hero_headline_accent: setHeadlineAccent,
+                    hero_headline_end: setHeadlineEnd,
+                    hero_description: setDescription,
+                    hero_accent_color: setAccentColor
+                };
+
+                data.forEach((item: { key: string, value: string }) => {
+                    if (settingsMap[item.key] && typeof settingsMap[item.key] === 'function') {
+                        // Typescript might complain about function type matching, calling simply:
+                        (settingsMap[item.key] as any)(item.value);
+                    }
+                });
             }
         };
-        fetchVideo();
+        fetchSettings();
     }, []);
 
     return (
@@ -31,19 +53,22 @@ export function FeatureSection() {
                 {/* Left Column: Typography */}
                 <div className="w-full md:w-1/2 flex flex-col gap-6 relative">
                     <span className="text-sm font-mono tracking-widest text-gray-400 uppercase mb-4">
-                        Look Ahead
+                        {tagline}
                     </span>
 
                     <h2 className="text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase font-oswald flex flex-col">
-                        <span className="block">THE</span>
-                        <span className="font-playfair italic font-light lowercase text-brand-yellow ml-12 -mt-2">
-                            future
+                        <span className="block">{headlineStart}</span>
+                        <span
+                            className="font-playfair italic font-light lowercase ml-12 -mt-2"
+                            style={{ color: accentColor }}
+                        >
+                            {headlineAccent}
                         </span>
-                        <span className="block">HAS ARRIVED.</span>
+                        <span className="block">{headlineEnd}</span>
                     </h2>
 
                     <p className="md:mt-12 text-sm md:text-base font-mono text-gray-400 tracking-wider uppercase border-l-2 border-brand-red pl-4">
-                        Awarded Branding & Web Design Agency.
+                        {description}
                     </p>
                 </div>
 
