@@ -84,7 +84,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
 
     return (
         <main className="min-h-screen bg-white text-black selection:bg-brand-yellow selection:text-black">
-            <SiteHeader />
+            <SiteHeader theme="light" />
 
             {loading ? (
                 <div className="min-h-screen flex items-center justify-center">
@@ -100,13 +100,24 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                     <section className="w-full px-6 md:px-12 pt-32 pb-8">
                         <div className="relative w-full aspect-[2/1] rounded-[2rem] overflow-hidden bg-zinc-100">
                             {project.cover_image && (
-                                <Image
-                                    src={project.cover_image}
-                                    alt={project.title}
-                                    fill
-                                    className="object-cover"
-                                    priority
-                                />
+                                project.cover_image.includes('.mp4') ? (
+                                    <video
+                                        src={project.cover_image}
+                                        className="w-full h-full object-cover"
+                                        autoPlay
+                                        muted
+                                        loop
+                                        playsInline
+                                    />
+                                ) : (
+                                    <Image
+                                        src={project.cover_image}
+                                        alt={project.title}
+                                        fill
+                                        className="object-cover"
+                                        priority
+                                    />
+                                )
                             )}
                         </div>
                     </section>
@@ -205,13 +216,28 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                                     </div>
                                 );
                             } else if (block.type === 'row') {
+                                const gridClass =
+                                    block.layout === '3-even' ? 'md:grid-cols-3' :
+                                        block.layout === '2-left' ? 'md:grid-cols-[2fr_1fr]' :
+                                            block.layout === '2-right' ? 'md:grid-cols-[1fr_2fr]' :
+                                                'md:grid-cols-2';
+
                                 return (
-                                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
-                                        {block.items.map((item: any, i: number) => (
-                                            <div key={i} className="w-full aspect-square rounded-[2rem] overflow-hidden relative border border-black/5">
-                                                {renderMedia(item)}
-                                            </div>
-                                        ))}
+                                    <div key={index} className={`grid grid-cols-1 ${gridClass} gap-6 md:gap-12`}>
+                                        {block.items.map((item: any, i: number) => {
+                                            const aspectClass =
+                                                block.aspectRatio === 'portrait' ? 'aspect-[3/4]' :
+                                                    block.aspectRatio === 'landscape' ? 'aspect-[4/3]' :
+                                                        block.aspectRatio === 'video' ? 'aspect-video' :
+                                                            block.aspectRatio === 'tall' ? 'aspect-[9/16]' :
+                                                                'aspect-square'; // Default
+
+                                            return (
+                                                <div key={i} className={`w-full ${aspectClass} rounded-[2rem] overflow-hidden relative border border-black/5`}>
+                                                    {renderMedia(item)}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 );
                             }

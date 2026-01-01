@@ -6,7 +6,7 @@ import { useState } from "react";
 import { X, Menu } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 
-export function SiteHeader() {
+export function SiteHeader({ theme = "dark" }: { theme?: "light" | "dark" }) {
     const [isOpen, setIsOpen] = useState(false);
     const { scrollY } = useScroll();
 
@@ -38,6 +38,9 @@ export function SiteHeader() {
         }
     };
 
+    const textColor = theme === "light" ? "text-black" : "text-white";
+    const borderColor = theme === "light" ? "border-black/20" : "border-white/20";
+
     return (
         <>
             <header className="fixed top-0 left-0 right-0 z-50 h-24 flex items-center justify-between px-6 pointer-events-none">
@@ -53,7 +56,7 @@ export function SiteHeader() {
                             src="/base-logo.png"
                             alt="BASE Creative"
                             fill
-                            className="object-contain object-left"
+                            className={`object-contain object-left ${theme === 'light' ? 'invert' : ''}`}
                             priority
                         />
                     </Link>
@@ -61,10 +64,10 @@ export function SiteHeader() {
 
                 <button
                     onClick={toggleMenu}
-                    className="group flex items-center gap-3 text-sm font-bold tracking-widest uppercase hover:text-brand-yellow transition-colors text-white relative z-50 pr-2 pointer-events-auto mix-blend-difference"
+                    className={`group flex items-center gap-3 text-sm font-bold tracking-widest uppercase hover:text-brand-yellow transition-colors ${textColor} relative z-50 pr-2 pointer-events-auto`}
                 >
                     {isOpen ? "Close" : "Menu"}
-                    <div className={`p-2 border border-white/20 rounded-full transition-all ${isOpen ? 'bg-black text-brand-yellow border-black' : 'group-hover:border-brand-yellow group-hover:bg-brand-yellow group-hover:text-black'}`}>
+                    <div className={`p-2 border rounded-full transition-all ${borderColor} ${isOpen ? 'bg-black text-brand-yellow border-black' : 'group-hover:border-brand-yellow group-hover:bg-brand-yellow group-hover:text-black'}`}>
                         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </div>
                 </button>
