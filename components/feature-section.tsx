@@ -16,6 +16,7 @@ export function FeatureSection() {
     const [headlineEnd, setHeadlineEnd] = useState("HAS ARRIVED.");
     const [description, setDescription] = useState("Awarded Branding & Web Design Agency.");
     const [accentColor, setAccentColor] = useState("#CCF000");
+    const [heroOrder, setHeroOrder] = useState<string[]>(['tagline', 'headline', 'description']);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -40,6 +41,13 @@ export function FeatureSection() {
                         // Typescript might complain about function type matching, calling simply:
                         (settingsMap[item.key] as any)(item.value);
                     }
+                    if (item.key === 'hero_elements_order') {
+                        try {
+                            setHeroOrder(JSON.parse(item.value));
+                        } catch (e) {
+                            console.error("Failed to parse hero order", e);
+                        }
+                    }
                 });
             }
         };
@@ -52,24 +60,37 @@ export function FeatureSection() {
 
                 {/* Left Column: Typography */}
                 <div className="w-full md:w-1/2 flex flex-col gap-6 relative">
-                    <span className="text-sm font-mono tracking-widest text-gray-400 uppercase mb-4">
-                        {tagline}
-                    </span>
-
-                    <h2 className="text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase font-oswald flex flex-col">
-                        <span className="block">{headlineStart}</span>
-                        <span
-                            className="font-playfair italic font-light lowercase ml-12 -mt-2"
-                            style={{ color: accentColor }}
-                        >
-                            {headlineAccent}
-                        </span>
-                        <span className="block">{headlineEnd}</span>
-                    </h2>
-
-                    <p className="md:mt-12 text-sm md:text-base font-mono text-gray-400 tracking-wider uppercase border-l-2 border-brand-red pl-4">
-                        {description}
-                    </p>
+                    {heroOrder.map((item, index) => {
+                        if (item === 'tagline') {
+                            return (
+                                <span key={item} className="text-sm font-mono tracking-widest text-gray-400 uppercase">
+                                    {tagline}
+                                </span>
+                            );
+                        }
+                        if (item === 'headline') {
+                            return (
+                                <h2 key={item} className="text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase font-oswald flex flex-col">
+                                    <span className="block">{headlineStart}</span>
+                                    <span
+                                        className="font-playfair italic font-light lowercase ml-12 -mt-2"
+                                        style={{ color: accentColor }}
+                                    >
+                                        {headlineAccent}
+                                    </span>
+                                    <span className="block">{headlineEnd}</span>
+                                </h2>
+                            );
+                        }
+                        if (item === 'description') {
+                            return (
+                                <p key={item} className="text-sm md:text-base font-mono text-gray-400 tracking-wider uppercase border-l-2 border-brand-red pl-4">
+                                    {description}
+                                </p>
+                            );
+                        }
+                        return null; // Fallback
+                    })}
                 </div>
 
                 {/* Right Column: Video Preview & Trigger */}

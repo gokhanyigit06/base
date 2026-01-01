@@ -2,12 +2,52 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Save, Upload, Type } from "lucide-react";
+import { Loader2, Save, Upload, Type, GripVertical } from "lucide-react";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableBlock({ id, children }: { id: string, children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
+
+    return (
+        <div ref={setNodeRef} style={style} className="relative group bg-zinc-950/50 rounded-xl border border-zinc-800/50 p-4 hover:border-zinc-700 transition-colors">
+            <div {...attributes} {...listeners} className="absolute left-1/2 -top-3 -translate-x-1/2 cursor-grab active:cursor-grabbing z-20 bg-zinc-800 rounded-full p-1 border border-zinc-700 text-gray-400 hover:text-white shadow-xl opacity-0 group-hover:opacity-100 transition-opacity touch-none">
+                <GripVertical className="w-4 h-4" />
+            </div>
+            {children}
+        </div>
+    );
+}
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+
+    // DnD State
+    const [heroOrder, setHeroOrder] = useState(['tagline', 'headline', 'description']);
+
+    // DnD Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setHeroOrder((items) => {
+                const oldIndex = items.indexOf(active.id as string);
+                const newIndex = items.indexOf(over.id as string);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
 
     // Form State
     const [settings, setSettings] = useState({
@@ -44,12 +84,22 @@ export default function SettingsPage() {
 
             if (data) {
                 const newSettings: any = { ...settings };
+                let loadedOrder = null;
+
                 data.forEach((item: { key: string, value: string }) => {
                     if (Object.keys(newSettings).includes(item.key)) {
                         newSettings[item.key] = item.value;
                     }
+                    if (item.key === 'hero_elements_order') {
+                        try {
+                            loadedOrder = JSON.parse(item.value);
+                        } catch (e) {
+                            console.error("Failed to parse hero order", e);
+                        }
+                    }
                 });
                 setSettings(newSettings);
+                if (loadedOrder) setHeroOrder(loadedOrder);
             }
             setLoading(false);
         };
@@ -68,6 +118,12 @@ export default function SettingsPage() {
                 key,
                 value
             }));
+
+            // Add Order
+            updates.push({
+                key: 'hero_elements_order',
+                value: JSON.stringify(heroOrder)
+            });
 
             const { error } = await supabase
                 .from('site_settings')
@@ -146,78 +202,86 @@ export default function SettingsPage() {
                         <h3 className="text-xl font-bold text-white uppercase tracking-wider">Homepage Hero Text</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p className="text-gray-500 text-xs mb-6 italic">Drag and drop the blocks below to reorder the sections on the homepage.</p>
 
-                        {/* Top Tagline */}
-                        <div className="col-span-2">
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Tagline (Small Top Text)</label>
-                            <input
-                                name="hero_tagline"
-                                value={settings.hero_tagline}
-                                onChange={handleChange}
-                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
-                            />
-                        </div>
-
-                        {/* Main Headline Parts */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Headline Part 1 (Block)</label>
-                            <input
-                                name="hero_headline_start"
-                                value={settings.hero_headline_start}
-                                onChange={handleChange}
-                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Headline Part 3 (Block)</label>
-                            <input
-                                name="hero_headline_end"
-                                value={settings.hero_headline_end}
-                                onChange={handleChange}
-                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg"
-                            />
-                        </div>
-
-                        {/* Accent Word & Color */}
-                        <div className="col-span-2 grid grid-cols-1 md:grid-cols-[1fr_100px] gap-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Accent Word (Script Font)</label>
-                                <input
-                                    name="hero_headline_accent"
-                                    value={settings.hero_headline_accent}
-                                    onChange={handleChange}
-                                    className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-brand-yellow placeholder:text-gray-700 focus:border-brand-yellow outline-none font-serif italic text-lg"
-                                    style={{ color: settings.hero_accent_color }}
-                                />
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={heroOrder} strategy={verticalListSortingStrategy}>
+                            <div className="flex flex-col gap-4">
+                                {heroOrder.map((itemId) => (
+                                    <SortableBlock key={itemId} id={itemId}>
+                                        {itemId === 'tagline' && (
+                                            <div>
+                                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Tagline (Small Top Text)</label>
+                                                <input
+                                                    name="hero_tagline"
+                                                    value={settings.hero_tagline}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                                                />
+                                            </div>
+                                        )}
+                                        {itemId === 'headline' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Headline Part 1</label>
+                                                    <input
+                                                        name="hero_headline_start"
+                                                        value={settings.hero_headline_start}
+                                                        onChange={handleChange}
+                                                        className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Headline Part 3</label>
+                                                    <input
+                                                        name="hero_headline_end"
+                                                        value={settings.hero_headline_end}
+                                                        onChange={handleChange}
+                                                        className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 grid grid-cols-[1fr_100px] gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Accent Word</label>
+                                                        <input
+                                                            name="hero_headline_accent"
+                                                            value={settings.hero_headline_accent}
+                                                            onChange={handleChange}
+                                                            className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-brand-yellow placeholder:text-gray-700 focus:border-brand-yellow outline-none font-serif italic text-lg"
+                                                            style={{ color: settings.hero_accent_color }}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Color</label>
+                                                        <div className="h-[50px] w-full relative rounded-lg overflow-hidden border border-zinc-700">
+                                                            <input
+                                                                type="color"
+                                                                name="hero_accent_color"
+                                                                value={settings.hero_accent_color}
+                                                                onChange={handleChange}
+                                                                className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-0"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {itemId === 'description' && (
+                                            <div>
+                                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Bottom Description</label>
+                                                <textarea
+                                                    name="hero_description"
+                                                    value={settings.hero_description}
+                                                    onChange={handleChange}
+                                                    className="w-full h-24 bg-black border border-zinc-700 rounded-lg p-3 text-gray-400 placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm resize-none"
+                                                />
+                                            </div>
+                                        )}
+                                    </SortableBlock>
+                                ))}
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Color</label>
-                                <div className="h-[50px] w-full relative rounded-lg overflow-hidden border border-zinc-700">
-                                    <input
-                                        type="color"
-                                        name="hero_accent_color"
-                                        value={settings.hero_accent_color}
-                                        onChange={handleChange}
-                                        className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-0"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Description */}
-                        <div className="col-span-2">
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Bottom Description</label>
-                            <textarea
-                                name="hero_description"
-                                value={settings.hero_description}
-                                onChange={handleChange}
-                                className="w-full h-24 bg-black border border-zinc-700 rounded-lg p-3 text-gray-400 placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm resize-none"
-                            />
-                        </div>
-
-                    </div>
+                        </SortableContext>
+                    </DndContext>
                 </section>
 
 
