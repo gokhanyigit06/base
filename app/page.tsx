@@ -11,12 +11,24 @@ export const revalidate = 0;
 
 async function getSettings() {
   // Add a timestamp to bypass any edge caching if absolutely needed, but force-dynamic should work.
-  const { data } = await supabase.from('site_settings').select('key, value');
-  if (!data) return {};
+  console.log("Fetching settings on server...");
+  const { data, error } = await supabase.from('site_settings').select('key, value');
+
+  if (error) {
+    console.error("Supabase SSR fetch error:", error);
+  }
+
+  if (!data) {
+    console.log("No data returned from settings fetch.");
+    return {};
+  }
+
   const settings: Record<string, string> = {};
   data.forEach(item => {
     settings[item.key] = item.value;
   });
+
+  console.log("Fetched Settings on Server:", JSON.stringify(settings, null, 2));
   return settings;
 }
 
@@ -46,3 +58,4 @@ export default async function Home() {
     </main>
   );
 }
+Triggering rebuild...

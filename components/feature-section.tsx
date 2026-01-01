@@ -14,8 +14,8 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
 
     // Dynamic Content State
     const [videoUrl, setVideoUrl] = useState(initialSettings['homepage_video_url'] || "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
-    const [tagline, setTagline] = useState(initialSettings['hero_tagline'] || "Look Ahead");
-    const [headlineStart, setHeadlineStart] = useState(initialSettings['hero_headline_start'] || "THE");
+    const [tagline, setTagline] = useState(initialSettings['hero_tagline'] || "LOOK AHEAD");
+    const [headlineStart, setHeadlineStart] = useState(initialSettings['hero_headline_start'] || "IT STARTS AT THE BASE");
     const [headlineAccent, setHeadlineAccent] = useState(initialSettings['hero_headline_accent'] || "future");
     const [headlineEnd, setHeadlineEnd] = useState(initialSettings['hero_headline_end'] || "HAS ARRIVED.");
     const [description, setDescription] = useState(initialSettings['hero_description'] || "Awarded Branding & Web Design Agency.");
