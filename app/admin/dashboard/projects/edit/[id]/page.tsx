@@ -366,28 +366,65 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                                                             + Add Slide
                                                         </button>
                                                     </div>
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                        {block.items.map((item: any, i: number) => (
-                                                            <div key={i} className="aspect-video bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item">
-                                                                {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
-                                                                <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                                                                    <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
-                                                                    {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
-                                                                </label>
+
+                                                    {/* Aspect Ratio Selector for Slider */}
+                                                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2 pl-8">
+                                                        <span className="text-xs text-gray-500 uppercase font-bold">Aspect Ratio</span>
+                                                        <div className="flex gap-2">
+                                                            {[
+                                                                { id: 'video', label: '16:9' },
+                                                                { id: '3-2', label: '3:2' },
+                                                                { id: 'landscape', label: '4:3' },
+                                                                { id: 'square', label: '1:1' },
+                                                                { id: 'portrait', label: '3:4' },
+                                                            ].map(ratio => (
                                                                 <button
+                                                                    key={ratio.id}
                                                                     type="button"
                                                                     onClick={() => {
                                                                         const newBlocks = [...contentBlocks];
-                                                                        newBlocks[index].items = newBlocks[index].items.filter((_: any, idx: number) => idx !== i);
+                                                                        newBlocks[index] = { ...newBlocks[index], aspectRatio: ratio.id };
                                                                         setContentBlocks(newBlocks);
                                                                     }}
-                                                                    className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover/item:opacity-100 transition-all"
+                                                                    className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.aspectRatio === ratio.id || (!block.aspectRatio && ratio.id === 'video') ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
                                                                 >
-                                                                    <Trash2 className="w-3 h-3" />
+                                                                    {ratio.label}
                                                                 </button>
-                                                                <span className="absolute bottom-1 right-2 text-[10px] font-mono text-white/50 bg-black/50 px-1 rounded">{i + 1}</span>
-                                                            </div>
-                                                        ))}
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        {block.items.map((item: any, i: number) => {
+                                                            const aspectClass =
+                                                                block.aspectRatio === 'square' ? 'aspect-square' :
+                                                                    block.aspectRatio === 'portrait' ? 'aspect-[3/4]' :
+                                                                        block.aspectRatio === 'landscape' ? 'aspect-[4/3]' :
+                                                                            block.aspectRatio === '3-2' ? 'aspect-[3/2]' :
+                                                                                'aspect-video';
+
+                                                            return (
+                                                                <div key={i} className={`${aspectClass} bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item`}>
+                                                                    {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
+                                                                    <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                                                                        <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
+                                                                        {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                                                    </label>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const newBlocks = [...contentBlocks];
+                                                                            newBlocks[index].items = newBlocks[index].items.filter((_: any, idx: number) => idx !== i);
+                                                                            setContentBlocks(newBlocks);
+                                                                        }}
+                                                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover/item:opacity-100 transition-all"
+                                                                    >
+                                                                        <Trash2 className="w-3 h-3" />
+                                                                    </button>
+                                                                    <span className="absolute bottom-1 right-2 text-[10px] font-mono text-white/50 bg-black/50 px-1 rounded">{i + 1}</span>
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
                                             ) : (
@@ -456,9 +493,9 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                                                     </div>
 
                                                     <div className={`grid gap-4 ${block.layout === '3-even' ? 'grid-cols-3' :
-                                                            block.layout === '2-left' ? 'grid-cols-[2fr_1fr]' :
-                                                                block.layout === '2-right' ? 'grid-cols-[1fr_2fr]' :
-                                                                    'grid-cols-2'
+                                                        block.layout === '2-left' ? 'grid-cols-[2fr_1fr]' :
+                                                            block.layout === '2-right' ? 'grid-cols-[1fr_2fr]' :
+                                                                'grid-cols-2'
                                                         }`}>
                                                         {block.items.map((item: any, i: number) => {
                                                             const aspectClass =

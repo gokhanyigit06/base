@@ -12,9 +12,10 @@ interface SliderItem {
 
 interface ProjectSliderProps {
     items: SliderItem[];
+    aspectRatio?: string;
 }
 
-export function ProjectSlider({ items }: ProjectSliderProps) {
+export function ProjectSlider({ items, aspectRatio = 'video' }: ProjectSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -33,7 +34,7 @@ export function ProjectSlider({ items }: ProjectSliderProps) {
                 setCurrentIndex((prevIndex) =>
                     prevIndex === items.length - 1 ? 0 : prevIndex + 1
                 ),
-            5000 // 5 seconds autoplay
+            3000 // 3 seconds autoplay
         );
 
         return () => {
@@ -51,9 +52,19 @@ export function ProjectSlider({ items }: ProjectSliderProps) {
 
     if (!items || items.length === 0) return null;
 
+    let aspectClass = 'aspect-video';
+    switch (aspectRatio) {
+        case 'square': aspectClass = 'aspect-square'; break;
+        case 'portrait': aspectClass = 'aspect-[3/4]'; break;
+        case 'landscape': aspectClass = 'aspect-[4/3]'; break;
+        case 'tall': aspectClass = 'aspect-[9/16]'; break;
+        case '3-2': aspectClass = 'aspect-[3/2]'; break;
+        default: aspectClass = 'aspect-video';
+    }
+
     return (
-        <div className="w-full relative group aspect-video md:aspect-[2/1] rounded-[2rem] overflow-hidden bg-zinc-100 border border-black/5">
-            <AnimatePresence mode="wait">
+        <div className={`w-full relative group ${aspectClass} rounded-[2rem] overflow-hidden bg-zinc-100 border border-black/5`}>
+            <AnimatePresence>
                 <motion.div
                     key={currentIndex}
                     initial={{ opacity: 0 }}

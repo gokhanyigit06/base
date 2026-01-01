@@ -8,25 +8,36 @@ import { supabase } from "@/lib/supabase";
 
 export function WorksSection() {
     const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
+    const [sectionTitle, setSectionTitle] = useState("Latest Works");
 
     useEffect(() => {
-        const fetchFeatured = async () => {
-            const { data } = await supabase
+        const fetchData = async () => {
+            // Fetch Featured Projects
+            const { data: projects } = await supabase
                 .from('projects')
                 .select('*')
                 .eq('is_featured', true)
                 .order('created_at', { ascending: false });
 
-            if (data) setFeaturedProjects(data);
+            if (projects) setFeaturedProjects(projects);
+
+            // Fetch Section Title
+            const { data: settings } = await supabase
+                .from('site_settings')
+                .select('value')
+                .eq('key', 'works_section_title')
+                .single();
+
+            if (settings) setSectionTitle(settings.value);
         };
-        fetchFeatured();
+        fetchData();
     }, []);
 
     if (featuredProjects.length === 0) return null; // Don't show section if no featured items
 
     return (
         <section className="w-full bg-white text-black px-6 md:px-12 pb-32">
-            <h2 className="text-sm font-mono uppercase tracking-widest text-gray-500 mb-12">Latest Works</h2>
+            <h2 className="text-sm font-mono uppercase tracking-widest text-gray-500 mb-12">{sectionTitle}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
                 {featuredProjects.map((project, index) => {
                     return (

@@ -244,7 +244,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                             } else if (block.type === 'slider') {
                                 return (
                                     <div key={index}>
-                                        <ProjectSlider items={block.items} />
+                                        <ProjectSlider items={block.items} aspectRatio={block.aspectRatio} />
                                     </div>
                                 );
                             }

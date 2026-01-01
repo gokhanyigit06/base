@@ -61,6 +61,11 @@ export default function SettingsPage() {
         hero_headline_end: "HAS ARRIVED.",
         hero_description: "Awarded Branding & Web Design Agency.",
 
+        // Works Section
+        works_section_title: "Latest Works",
+        marquee_text: "LATEST WORKS",
+        marquee_speed: "5",
+
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
 
@@ -282,6 +287,53 @@ export default function SettingsPage() {
                             </div>
                         </SortableContext>
                     </DndContext>
+                </section>
+
+
+                {/* --- WORKS SECTION --- */}
+                <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+                        <Type className="text-brand-yellow w-6 h-6" />
+                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Works Section</h3>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Section Title</label>
+                        <input
+                            name="works_section_title"
+                            value={settings.works_section_title}
+                            onChange={handleChange}
+                            className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                        />
+                    </div>
+
+                    <div className="mt-6">
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Marquee Text (Scrolling Text)</label>
+                        <input
+                            name="marquee_text"
+                            value={settings.marquee_text}
+                            onChange={handleChange}
+                            className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                        />
+                    </div>
+
+                    <div className="mt-6">
+                        <div className="flex justify-between mb-2">
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500">Marquee Speed</label>
+                            <span className="text-xs font-mono text-brand-yellow">{settings.marquee_speed}%</span>
+                        </div>
+                        <input
+                            type="range"
+                            min="0"
+                            max="50"
+                            step="1"
+                            name="marquee_speed"
+                            value={settings.marquee_speed}
+                            onChange={handleChange}
+                            className="w-full accent-brand-yellow cursor-pointer"
+                        />
+                        <p className="text-[10px] text-gray-600 mt-1">Controls how fast the text moves when scrolling.</p>
+                    </div>
                 </section>
 
 
