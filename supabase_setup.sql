@@ -73,10 +73,14 @@ for select
 to public
 using (true);
 
-create policy "Enable insert/update for anon (for dev only - restrict in prod)"
+create policy "Enable insert for anon"
 on "public"."site_settings"
-as permissive
-for all
+for insert
 to anon
-using (true)
 with check (true);
+
+create policy "Enable update for anon"
+on "public"."site_settings"
+for update
+to anon
+using (true);
