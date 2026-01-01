@@ -28,6 +28,7 @@ export default function SettingsPage() {
 
     // DnD State
     const [heroOrder, setHeroOrder] = useState(['tagline', 'headline', 'description']);
+    const [customFonts, setCustomFonts] = useState<Array<{ id: string; name: string; font_url: string; font_family: string }>>([]);
 
     // DnD Sensors
     const sensors = useSensors(
@@ -75,13 +76,19 @@ export default function SettingsPage() {
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
         hero_tagline_color: "#9CA3AF",
-        hero_headline_color: "#FFFFFF",
+        hero_headline_color: "#FFFFFF", // Legacy/fallback
+        hero_headline_start_color: "#FFFFFF", // NEW: Headline Part 1
+        hero_headline_accent_color: "#CCF000", // NEW: Accent Word (yellow by default)
+        hero_headline_end_color: "#FFFFFF", // NEW: Headline Part 3
         hero_description_color: "#9CA3AF",
 
         // Fonts
         custom_font_url: "",
         hero_tagline_font: "font-mono",
-        hero_headline_font: "font-oswald",
+        hero_headline_font: "font-oswald", // Legacy/fallback
+        hero_headline_start_font: "font-oswald", // NEW: Headline Part 1
+        hero_headline_accent_font: "font-oswald", // NEW: Accent Word
+        hero_headline_end_font: "font-oswald", // NEW: Headline Part 3
         hero_description_font: "font-mono",
 
         // Slogan Section
@@ -145,9 +152,15 @@ export default function SettingsPage() {
                     hero_accent_color: (val: string) => setSettings(prev => ({ ...prev, hero_accent_color: val })),
                     hero_tagline_color: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_color: val })),
                     hero_headline_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_color: val })),
+                    hero_headline_start_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_start_color: val })),
+                    hero_headline_accent_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_accent_color: val })),
+                    hero_headline_end_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end_color: val })),
                     hero_description_color: (val: string) => setSettings(prev => ({ ...prev, hero_description_color: val })),
                     hero_tagline_font: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_font: val })),
                     hero_headline_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_font: val })),
+                    hero_headline_start_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_start_font: val })),
+                    hero_headline_accent_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_accent_font: val })),
+                    hero_headline_end_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end_font: val })),
                     hero_description_font: (val: string) => setSettings(prev => ({ ...prev, hero_description_font: val })),
                     custom_font_url: (val: string) => setSettings(prev => ({ ...prev, custom_font_url: val })),
 
@@ -213,7 +226,18 @@ export default function SettingsPage() {
             }
             setLoading(false);
         };
+
+        const fetchCustomFonts = async () => {
+            const { data } = await supabase
+                .from('custom_fonts')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (data) setCustomFonts(data);
+        };
+
         fetchSettings();
+        fetchCustomFonts();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -357,6 +381,83 @@ export default function SettingsPage() {
             alert(`Error uploading font: ${error.message || "Unknown error"}`);
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleCustomFontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const fontName = prompt("Enter a name for this font (e.g., 'Montserrat Bold'):");
+        if (!fontName || fontName.trim() === "") {
+            alert("Font name is required!");
+            return;
+        }
+
+        setUploading(true);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `custom-font-${Date.now()}.${fileExt}`;
+            const filePath = `site-assets/fonts/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('project-assets')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+            const publicUrl = data.publicUrl;
+
+            // Generate unique font-family class
+            const fontFamily = `font-custom-${Date.now()}`;
+
+            // Save to custom_fonts table
+            const { error: dbError } = await supabase
+                .from('custom_fonts')
+                .insert({
+                    name: fontName.trim(),
+                    font_url: publicUrl,
+                    font_family: fontFamily
+                });
+
+            if (dbError) throw dbError;
+
+            // Refresh custom fonts list
+            const { data: fontsData } = await supabase
+                .from('custom_fonts')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (fontsData) setCustomFonts(fontsData);
+
+            alert(`Font "${fontName}" uploaded successfully!`);
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Error uploading font: ${error.message || "Unknown error"}`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeleteCustomFont = async (fontId: string, fontName: string) => {
+        if (!confirm(`Are you sure you want to delete "${fontName}"?`)) return;
+
+        try {
+            const { error } = await supabase
+                .from('custom_fonts')
+                .delete()
+                .eq('id', fontId);
+
+            if (error) throw error;
+
+            setCustomFonts(customFonts.filter(f => f.id !== fontId));
+            alert(`Font "${fontName}" deleted successfully!`);
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Error deleting font: ${error.message || "Unknown error"}`);
         }
     };
 
