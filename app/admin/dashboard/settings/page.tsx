@@ -387,7 +387,7 @@ export default function SettingsPage() {
                     <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
                         <input
                             type="file"
-                            accept="image/png, image/svg+xml"
+                            accept="image/png, image/svg+xml, .svg"
                             onChange={handleCursorUpload}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                         />
