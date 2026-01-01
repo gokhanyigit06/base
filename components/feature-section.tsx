@@ -90,8 +90,7 @@ export function FeatureSection() {
                             />
                         </div>
 
-                        {/* Gradient Overlay for atmosphere */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-brand-purple/20 via-transparent to-brand-orange/20 mix-blend-screen pointer-events-none" />
+
 
                         {/* Hover Hint */}
                         <div className="absolute bottom-8 left-8 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
