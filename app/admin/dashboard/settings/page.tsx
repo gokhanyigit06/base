@@ -40,12 +40,12 @@ export default function HomepageSettingsPage() {
             const filePath = `site-assets/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('projects')
+                .from('project-assets')
                 .upload(filePath, file);
 
             if (uploadError) throw uploadError;
 
-            const { data } = supabase.storage.from('projects').getPublicUrl(filePath);
+            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
             const publicUrl = data.publicUrl;
 
             // Save to DB
@@ -59,9 +59,9 @@ export default function HomepageSettingsPage() {
             setCurrentUrl(publicUrl);
             alert("Video updated successfully!");
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert("Error uploading video.");
+            alert(`Error uploading video: ${error.message || error.error_description || "Unknown error"}`);
         } finally {
             setUploading(false);
         }
