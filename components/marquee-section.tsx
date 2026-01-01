@@ -10,8 +10,8 @@ export function MarqueeSection() {
         offset: ["start end", "end start"],
     });
 
-    // 1. Slower horizontal movement (Reduced from -30% to -10%)
-    const x = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
+    // 1. Slower horizontal movement (Reduced to -5% for ultra-slow flow)
+    const x = useTransform(scrollYProgress, [0, 1], ["0%", "-5%"]);
 
     // 2. Velocity-based Skew (Italic Effect)
     const scrollVelocity = useVelocity(scrollY);
