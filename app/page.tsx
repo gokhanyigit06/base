@@ -6,9 +6,11 @@ import { SloganSection } from "@/components/slogan-section";
 import { SiteFooter } from "@/components/site-footer";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 async function getSettings() {
+  // Add a timestamp to bypass any edge caching if absolutely needed, but force-dynamic should work.
   const { data } = await supabase.from('site_settings').select('key, value');
   if (!data) return {};
   const settings: Record<string, string> = {};
