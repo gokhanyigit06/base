@@ -3,29 +3,33 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-export function SloganSection() {
+interface SloganSectionProps {
+    initialSettings?: Record<string, string>;
+}
+
+export function SloganSection({ initialSettings = {} }: SloganSectionProps) {
     // Text States
-    const [l1Start, setL1Start] = useState("WE DON'T JUST");
-    const [l1Accent, setL1Accent] = useState("design");
-    const [l2Accent, setL2Accent] = useState("we");
-    const [l2Middle, setL2Middle] = useState("DEFINE");
-    const [l2End, setL2End] = useState("THE FUTURE.");
+    const [l1Start, setL1Start] = useState(initialSettings['slogan_l1_start'] || "WE DON'T JUST");
+    const [l1Accent, setL1Accent] = useState(initialSettings['slogan_l1_accent'] || "design");
+    const [l2Accent, setL2Accent] = useState(initialSettings['slogan_l2_accent'] || "we");
+    const [l2Middle, setL2Middle] = useState(initialSettings['slogan_l2_middle'] || "DEFINE");
+    const [l2End, setL2End] = useState(initialSettings['slogan_l2_end'] || "THE FUTURE.");
 
     // Style States
-    const [l1StartFont, setL1StartFont] = useState("font-oswald");
-    const [l1StartColor, setL1StartColor] = useState("#000000");
+    const [l1StartFont, setL1StartFont] = useState(initialSettings['slogan_l1_start_font'] || "font-oswald");
+    const [l1StartColor, setL1StartColor] = useState(initialSettings['slogan_l1_start_color'] || "#000000");
 
-    const [l1AccentFont, setL1AccentFont] = useState("font-serif");
-    const [l1AccentColor, setL1AccentColor] = useState("#000000");
+    const [l1AccentFont, setL1AccentFont] = useState(initialSettings['slogan_l1_accent_font'] || "font-serif");
+    const [l1AccentColor, setL1AccentColor] = useState(initialSettings['slogan_l1_accent_color'] || "#000000");
 
-    const [l2AccentFont, setL2AccentFont] = useState("font-serif");
-    const [l2AccentColor, setL2AccentColor] = useState("#000000");
+    const [l2AccentFont, setL2AccentFont] = useState(initialSettings['slogan_l2_accent_font'] || "font-serif");
+    const [l2AccentColor, setL2AccentColor] = useState(initialSettings['slogan_l2_accent_color'] || "#000000");
 
-    const [l2MiddleFont, setL2MiddleFont] = useState("font-oswald");
-    const [l2MiddleColor, setL2MiddleColor] = useState("#000000");
+    const [l2MiddleFont, setL2MiddleFont] = useState(initialSettings['slogan_l2_middle_font'] || "font-oswald");
+    const [l2MiddleColor, setL2MiddleColor] = useState(initialSettings['slogan_l2_middle_color'] || "#000000");
 
-    const [l2EndFont, setL2EndFont] = useState("font-oswald");
-    const [l2EndColor, setL2EndColor] = useState("#000000");
+    const [l2EndFont, setL2EndFont] = useState(initialSettings['slogan_l2_end_font'] || "font-oswald");
+    const [l2EndColor, setL2EndColor] = useState(initialSettings['slogan_l2_end_color'] || "#000000");
 
     useEffect(() => {
         const fetchSettings = async () => {

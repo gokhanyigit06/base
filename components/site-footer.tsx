@@ -5,32 +5,36 @@ import { ArrowUpRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-export function SiteFooter() {
-    const [email, setEmail] = useState("hello@base.agency");
-    const [phone, setPhone] = useState("+90 (212) 555 0123");
-    const [address, setAddress] = useState("Levent, Istanbul\nTurkiye, 34330");
-    const [copyright, setCopyright] = useState("© 2025 Base Agency. All rights reserved.");
+interface SiteFooterProps {
+    initialSettings?: Record<string, string>;
+}
+
+export function SiteFooter({ initialSettings = {} }: SiteFooterProps) {
+    const [email, setEmail] = useState(initialSettings['footer_email'] || "hello@base.agency");
+    const [phone, setPhone] = useState(initialSettings['footer_phone'] || "+90 (212) 555 0123");
+    const [address, setAddress] = useState(initialSettings['footer_address'] || "Levent, Istanbul\nTurkiye, 34330");
+    const [copyright, setCopyright] = useState(initialSettings['footer_copyright'] || "© 2025 Base Agency. All rights reserved.");
 
     // Socials
-    const [instagram, setInstagram] = useState("#");
-    const [linkedin, setLinkedin] = useState("#");
-    const [twitter, setTwitter] = useState("#");
-    const [behance, setBehance] = useState("#");
+    const [instagram, setInstagram] = useState(initialSettings['social_instagram'] || "#");
+    const [linkedin, setLinkedin] = useState(initialSettings['social_linkedin'] || "#");
+    const [twitter, setTwitter] = useState(initialSettings['social_twitter'] || "#");
+    const [behance, setBehance] = useState(initialSettings['social_behance'] || "#");
 
     // CTA Settings
-    const [ctaText1, setCtaText1] = useState("HAVE AN IDEA?");
-    const [ctaText1Font, setCtaText1Font] = useState("font-oswald");
-    const [ctaText1Color, setCtaText1Color] = useState("#FFFFFF");
+    const [ctaText1, setCtaText1] = useState(initialSettings['cta_text_1'] || "HAVE AN IDEA?");
+    const [ctaText1Font, setCtaText1Font] = useState(initialSettings['cta_text_1_font'] || "font-oswald");
+    const [ctaText1Color, setCtaText1Color] = useState(initialSettings['cta_text_1_color'] || "#FFFFFF");
 
-    const [ctaText2, setCtaText2] = useState("LET'S BUILD.");
-    const [ctaText2Font, setCtaText2Font] = useState("font-oswald");
-    const [ctaText2Color, setCtaText2Color] = useState("#CCF000");
+    const [ctaText2, setCtaText2] = useState(initialSettings['cta_text_2'] || "LET'S BUILD.");
+    const [ctaText2Font, setCtaText2Font] = useState(initialSettings['cta_text_2_font'] || "font-oswald");
+    const [ctaText2Color, setCtaText2Color] = useState(initialSettings['cta_text_2_color'] || "#CCF000");
 
-    const [ctaBtnText, setCtaBtnText] = useState("Start a Project");
-    const [ctaBtnFont, setCtaBtnFont] = useState("font-sans");
-    const [ctaBtnTextColor, setCtaBtnTextColor] = useState("#FFFFFF");
-    const [ctaBtnBgColor, setCtaBtnBgColor] = useState("transparent");
-    const [ctaBtnBorderColor, setCtaBtnBorderColor] = useState("rgba(255,255,255,0.2)");
+    const [ctaBtnText, setCtaBtnText] = useState(initialSettings['cta_btn_text'] || "Start a Project");
+    const [ctaBtnFont, setCtaBtnFont] = useState(initialSettings['cta_btn_font'] || "font-sans");
+    const [ctaBtnTextColor, setCtaBtnTextColor] = useState(initialSettings['cta_btn_text_color'] || "#FFFFFF");
+    const [ctaBtnBgColor, setCtaBtnBgColor] = useState(initialSettings['cta_btn_bg_color'] || "transparent");
+    const [ctaBtnBorderColor, setCtaBtnBorderColor] = useState(initialSettings['cta_btn_border_color'] || "rgba(255,255,255,0.2)");
 
 
     useEffect(() => {

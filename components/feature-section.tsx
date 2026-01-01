@@ -5,29 +5,39 @@ import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
-export function FeatureSection() {
+interface FeatureSectionProps {
+    initialSettings?: Record<string, string>;
+}
+
+export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
     const [isVideoOpen, setIsVideoOpen] = useState(false);
 
     // Dynamic Content State
-    const [videoUrl, setVideoUrl] = useState("https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
-    const [tagline, setTagline] = useState("Look Ahead");
-    const [headlineStart, setHeadlineStart] = useState("THE");
-    const [headlineAccent, setHeadlineAccent] = useState("future");
-    const [headlineEnd, setHeadlineEnd] = useState("HAS ARRIVED.");
-    const [description, setDescription] = useState("Awarded Branding & Web Design Agency.");
-    const [accentColor, setAccentColor] = useState("#CCF000");
+    const [videoUrl, setVideoUrl] = useState(initialSettings['homepage_video_url'] || "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
+    const [tagline, setTagline] = useState(initialSettings['hero_tagline'] || "Look Ahead");
+    const [headlineStart, setHeadlineStart] = useState(initialSettings['hero_headline_start'] || "THE");
+    const [headlineAccent, setHeadlineAccent] = useState(initialSettings['hero_headline_accent'] || "future");
+    const [headlineEnd, setHeadlineEnd] = useState(initialSettings['hero_headline_end'] || "HAS ARRIVED.");
+    const [description, setDescription] = useState(initialSettings['hero_description'] || "Awarded Branding & Web Design Agency.");
+    const [accentColor, setAccentColor] = useState(initialSettings['hero_accent_color'] || "#CCF000");
 
     // Styling States
-    const [taglineColor, setTaglineColor] = useState("#9CA3AF");
-    const [taglineFont, setTaglineFont] = useState("font-mono");
+    const [taglineColor, setTaglineColor] = useState(initialSettings['hero_tagline_color'] || "#9CA3AF");
+    const [taglineFont, setTaglineFont] = useState(initialSettings['hero_tagline_font'] || "font-mono");
 
-    const [headlineColor, setHeadlineColor] = useState("#FFFFFF");
-    const [headlineFont, setHeadlineFont] = useState("font-oswald");
+    const [headlineColor, setHeadlineColor] = useState(initialSettings['hero_headline_color'] || "#FFFFFF");
+    const [headlineFont, setHeadlineFont] = useState(initialSettings['hero_headline_font'] || "font-oswald");
 
-    const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
-    const [descriptionFont, setDescriptionFont] = useState("font-mono");
+    const [descriptionColor, setDescriptionColor] = useState(initialSettings['hero_description_color'] || "#9CA3AF");
+    const [descriptionFont, setDescriptionFont] = useState(initialSettings['hero_description_font'] || "font-mono");
 
-    const [heroOrder, setHeroOrder] = useState<string[]>(['tagline', 'headline', 'description']);
+    const [heroOrder, setHeroOrder] = useState<string[]>(() => {
+        try {
+            return initialSettings['hero_elements_order'] ? JSON.parse(initialSettings['hero_elements_order']) : ['tagline', 'headline', 'description'];
+        } catch {
+            return ['tagline', 'headline', 'description'];
+        }
+    });
 
     useEffect(() => {
         const fetchSettings = async () => {
