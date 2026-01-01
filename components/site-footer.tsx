@@ -17,6 +17,22 @@ export function SiteFooter() {
     const [twitter, setTwitter] = useState("#");
     const [behance, setBehance] = useState("#");
 
+    // CTA Settings
+    const [ctaText1, setCtaText1] = useState("HAVE AN IDEA?");
+    const [ctaText1Font, setCtaText1Font] = useState("font-oswald");
+    const [ctaText1Color, setCtaText1Color] = useState("#FFFFFF");
+
+    const [ctaText2, setCtaText2] = useState("LET'S BUILD.");
+    const [ctaText2Font, setCtaText2Font] = useState("font-oswald");
+    const [ctaText2Color, setCtaText2Color] = useState("#CCF000");
+
+    const [ctaBtnText, setCtaBtnText] = useState("Start a Project");
+    const [ctaBtnFont, setCtaBtnFont] = useState("font-sans");
+    const [ctaBtnTextColor, setCtaBtnTextColor] = useState("#FFFFFF");
+    const [ctaBtnBgColor, setCtaBtnBgColor] = useState("transparent");
+    const [ctaBtnBorderColor, setCtaBtnBorderColor] = useState("rgba(255,255,255,0.2)");
+
+
     useEffect(() => {
         const fetchSettings = async () => {
             const { data } = await supabase
@@ -32,7 +48,19 @@ export function SiteFooter() {
                     social_instagram: setInstagram,
                     social_linkedin: setLinkedin,
                     social_twitter: setTwitter,
-                    social_behance: setBehance
+                    social_behance: setBehance,
+                    // CTA
+                    cta_text_1: setCtaText1,
+                    cta_text_1_font: setCtaText1Font,
+                    cta_text_1_color: setCtaText1Color,
+                    cta_text_2: setCtaText2,
+                    cta_text_2_font: setCtaText2Font,
+                    cta_text_2_color: setCtaText2Color,
+                    cta_btn_text: setCtaBtnText,
+                    cta_btn_font: setCtaBtnFont,
+                    cta_btn_text_color: setCtaBtnTextColor,
+                    cta_btn_bg_color: setCtaBtnBgColor,
+                    cta_btn_border_color: setCtaBtnBorderColor,
                 };
 
                 data.forEach((item: { key: string, value: string }) => {
@@ -51,19 +79,32 @@ export function SiteFooter() {
 
                 {/* Upper: Big CTA */}
                 <div className="flex flex-col gap-8 mb-24">
-                    <h2 className="text-[12vw] leading-[0.8] font-bold font-oswald uppercase tracking-tighter text-white">
-                        HAVE AN IDEA?
+                    <h2
+                        className={`text-[12vw] leading-[0.8] font-bold uppercase tracking-tighter ${ctaText1Font}`}
+                        style={{ color: ctaText1Color }}
+                    >
+                        {ctaText1}
                     </h2>
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-12">
-                        <h2 className="text-[12vw] leading-[0.8] font-bold font-oswald uppercase tracking-tighter text-brand-yellow">
-                            LET'S BUILD.
+                        <h2
+                            className={`text-[12vw] leading-[0.8] font-bold uppercase tracking-tighter ${ctaText2Font}`}
+                            style={{ color: ctaText2Color }}
+                        >
+                            {ctaText2}
                         </h2>
 
                         <Link
                             href="/contact"
-                            className="group relative px-12 py-6 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 transition-colors flex items-center gap-4"
+                            className="group relative px-12 py-6 rounded-full border transition-all flex items-center gap-4 hover:opacity-80"
+                            style={{
+                                borderColor: ctaBtnBorderColor,
+                                backgroundColor: ctaBtnBgColor,
+                                color: ctaBtnTextColor
+                            }}
                         >
-                            <span className="text-xl md:text-2xl font-bold uppercase tracking-widest">Start a Project</span>
+                            <span className={`text-xl md:text-2xl font-bold uppercase tracking-widest ${ctaBtnFont}`}>
+                                {ctaBtnText}
+                            </span>
                             <ArrowUpRight className="w-8 h-8 group-hover:rotate-45 transition-transform duration-300" />
                         </Link>
                     </div>

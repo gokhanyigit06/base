@@ -84,6 +84,38 @@ export default function SettingsPage() {
         hero_headline_font: "font-oswald",
         hero_description_font: "font-mono",
 
+        // Slogan Section
+        slogan_l1_start: "WE DON'T JUST",
+        slogan_l1_accent: "design",
+        slogan_l2_accent: "we",
+        slogan_l2_middle: "DEFINE",
+        slogan_l2_end: "THE FUTURE.",
+
+        // Slogan Styles
+        slogan_l1_start_font: "font-oswald",
+        slogan_l1_start_color: "#000000",
+        slogan_l1_accent_font: "font-serif",
+        slogan_l1_accent_color: "#000000",
+        slogan_l2_accent_font: "font-serif",
+        slogan_l2_accent_color: "#000000",
+        slogan_l2_middle_font: "font-oswald",
+        slogan_l2_middle_color: "#000000",
+        slogan_l2_end_font: "font-oswald",
+        slogan_l2_end_color: "#000000",
+
+        // Footer CTA
+        cta_text_1: "HAVE AN IDEA?",
+        cta_text_1_font: "font-oswald",
+        cta_text_1_color: "#FFFFFF",
+        cta_text_2: "LET'S BUILD.",
+        cta_text_2_font: "font-oswald",
+        cta_text_2_color: "#CCF000",
+        cta_btn_text: "Start a Project",
+        cta_btn_font: "font-sans",
+        cta_btn_text_color: "#FFFFFF",
+        cta_btn_bg_color: "#18181b",
+        cta_btn_border_color: "#3f3f46",
+
         // Footer Settings
         footer_email: "hello@base.agency",
         footer_phone: "+90 (212) 555 0123",
@@ -118,6 +150,36 @@ export default function SettingsPage() {
                     hero_headline_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_font: val })),
                     hero_description_font: (val: string) => setSettings(prev => ({ ...prev, hero_description_font: val })),
                     custom_font_url: (val: string) => setSettings(prev => ({ ...prev, custom_font_url: val })),
+
+                    slogan_l1_start: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_start: val })),
+                    slogan_l1_accent: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_accent: val })),
+                    slogan_l2_accent: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_accent: val })),
+                    slogan_l2_middle: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_middle: val })),
+                    slogan_l2_end: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_end: val })),
+
+                    slogan_l1_start_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_start_font: val })),
+                    slogan_l1_start_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_start_color: val })),
+                    slogan_l1_accent_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_accent_font: val })),
+                    slogan_l1_accent_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_accent_color: val })),
+                    slogan_l2_accent_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_accent_font: val })),
+                    slogan_l2_accent_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_accent_color: val })),
+                    slogan_l2_middle_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_middle_font: val })),
+                    slogan_l2_middle_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_middle_color: val })),
+                    slogan_l2_end_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_end_font: val })),
+                    slogan_l2_end_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_end_color: val })),
+
+                    cta_text_1: (val: string) => setSettings(prev => ({ ...prev, cta_text_1: val })),
+                    cta_text_1_font: (val: string) => setSettings(prev => ({ ...prev, cta_text_1_font: val })),
+                    cta_text_1_color: (val: string) => setSettings(prev => ({ ...prev, cta_text_1_color: val })),
+                    cta_text_2: (val: string) => setSettings(prev => ({ ...prev, cta_text_2: val })),
+                    cta_text_2_font: (val: string) => setSettings(prev => ({ ...prev, cta_text_2_font: val })),
+                    cta_text_2_color: (val: string) => setSettings(prev => ({ ...prev, cta_text_2_color: val })),
+                    cta_btn_text: (val: string) => setSettings(prev => ({ ...prev, cta_btn_text: val })),
+                    cta_btn_font: (val: string) => setSettings(prev => ({ ...prev, cta_btn_font: val })),
+                    cta_btn_text_color: (val: string) => setSettings(prev => ({ ...prev, cta_btn_text_color: val })),
+                    cta_btn_bg_color: (val: string) => setSettings(prev => ({ ...prev, cta_btn_bg_color: val })),
+                    cta_btn_border_color: (val: string) => setSettings(prev => ({ ...prev, cta_btn_border_color: val })),
+
                     footer_email: (val: string) => setSettings(prev => ({ ...prev, footer_email: val })),
                     footer_phone: (val: string) => setSettings(prev => ({ ...prev, footer_phone: val })),
                     footer_address: (val: string) => setSettings(prev => ({ ...prev, footer_address: val })),
@@ -573,6 +635,163 @@ export default function SettingsPage() {
                             className="w-full accent-brand-yellow cursor-pointer"
                         />
                         <p className="text-[10px] text-gray-600 mt-1">Controls how fast the text moves when scrolling.</p>
+                    </div>
+                </section>
+
+
+                {/* --- SLOGAN SECTION --- */}
+                <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+                        <Type className="text-brand-yellow w-6 h-6" />
+                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Slogan Section Typography</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                        {[
+                            { label: "Line 1 - Start", key: "slogan_l1_start" },
+                            { label: "Line 1 - Accent", key: "slogan_l1_accent" },
+                            { label: "Line 2 - Start", key: "slogan_l2_accent" },
+                            { label: "Line 2 - Middle", key: "slogan_l2_middle" },
+                            { label: "Line 2 - End", key: "slogan_l2_end" },
+                        ].map((item) => (
+                            <div key={item.key} className="bg-black p-4 rounded-xl border border-zinc-800">
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                    <div className="md:col-span-6">
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">{item.label}</label>
+                                        <input
+                                            name={item.key}
+                                            value={(settings as any)[item.key]}
+                                            onChange={handleChange}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white outline-none focus:border-brand-yellow text-sm"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-4">
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font Family</label>
+                                        <select
+                                            name={`${item.key}_font`}
+                                            value={(settings as any)[`${item.key}_font`]}
+                                            onChange={handleChange}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                        >
+                                            <option value="font-sans">Sans Serif</option>
+                                            <option value="font-serif">Serif (Playfair)</option>
+                                            <option value="font-mono">Monospace</option>
+                                            <option value="font-oswald">Oswald (Bold)</option>
+                                            <option value="font-custom">Custom Font (Uploaded)</option>
+                                        </select>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                        <input
+                                            type="color"
+                                            name={`${item.key}_color`}
+                                            value={(settings as any)[`${item.key}_color`]}
+                                            onChange={handleChange}
+                                            className="h-9 w-full bg-zinc-900 border border-zinc-700 rounded-lg cursor-pointer p-0"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+
+                {/* --- FOOTER CTA (CONTACT) --- */}
+                <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+                        <Type className="text-brand-yellow w-6 h-6" />
+                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Footer CTA Section</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Line 1 */}
+                        <div className="bg-black p-4 rounded-xl border border-zinc-800">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                <div className="md:col-span-6">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Line 1 Text</label>
+                                    <input name="cta_text_1" value={settings.cta_text_1} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white outline-none focus:border-brand-yellow text-sm" />
+                                </div>
+                                <div className="md:col-span-4">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
+                                    <select name="cta_text_1_font" value={settings.cta_text_1_font} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow">
+                                        <option value="font-sans">Sans Serif</option>
+                                        <option value="font-serif">Serif (Playfair)</option>
+                                        <option value="font-mono">Monospace</option>
+                                        <option value="font-oswald">Oswald (Bold)</option>
+                                        <option value="font-custom">Custom Font (Uploaded)</option>
+                                    </select>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                    <input type="color" name="cta_text_1_color" value={settings.cta_text_1_color} onChange={handleChange} className="h-9 w-full bg-zinc-900 border-zinc-700 rounded-lg cursor-pointer p-0" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Line 2 */}
+                        <div className="bg-black p-4 rounded-xl border border-zinc-800">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                <div className="md:col-span-6">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Line 2 Text</label>
+                                    <input name="cta_text_2" value={settings.cta_text_2} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white outline-none focus:border-brand-yellow text-sm" />
+                                </div>
+                                <div className="md:col-span-4">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
+                                    <select name="cta_text_2_font" value={settings.cta_text_2_font} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow">
+                                        <option value="font-sans">Sans Serif</option>
+                                        <option value="font-serif">Serif (Playfair)</option>
+                                        <option value="font-mono">Monospace</option>
+                                        <option value="font-oswald">Oswald (Bold)</option>
+                                        <option value="font-custom">Custom Font (Uploaded)</option>
+                                    </select>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                    <input type="color" name="cta_text_2_color" value={settings.cta_text_2_color} onChange={handleChange} className="h-9 w-full bg-zinc-900 border-zinc-700 rounded-lg cursor-pointer p-0" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* CTA Button */}
+                        <div className="bg-black p-4 rounded-xl border border-zinc-800">
+                            <h4 className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-4">Button Styling</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end mb-4">
+                                <div className="md:col-span-6">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Button Text</label>
+                                    <input name="cta_btn_text" value={settings.cta_btn_text} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white outline-none focus:border-brand-yellow text-sm" />
+                                </div>
+                                <div className="md:col-span-4">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
+                                    <select name="cta_btn_font" value={settings.cta_btn_font} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow">
+                                        <option value="font-sans">Sans Serif</option>
+                                        <option value="font-serif">Serif (Playfair)</option>
+                                        <option value="font-mono">Monospace</option>
+                                        <option value="font-oswald">Oswald (Bold)</option>
+                                        <option value="font-custom">Custom Font (Uploaded)</option>
+                                    </select>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Text Color</label>
+                                    <input type="color" name="cta_btn_text_color" value={settings.cta_btn_text_color} onChange={handleChange} className="h-9 w-full bg-zinc-900 border-zinc-700 rounded-lg cursor-pointer p-0" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Background Color</label>
+                                    <div className="flex items-center gap-2">
+                                        <input type="color" name="cta_btn_bg_color" value={settings.cta_btn_bg_color} onChange={handleChange} className="h-9 w-full bg-zinc-900 border-zinc-700 rounded-lg cursor-pointer p-0" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Border Color</label>
+                                    <div className="flex items-center gap-2">
+                                        <input type="color" name="cta_btn_border_color" value={settings.cta_btn_border_color} onChange={handleChange} className="h-9 w-full bg-zinc-900 border-zinc-700 rounded-lg cursor-pointer p-0" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
 
