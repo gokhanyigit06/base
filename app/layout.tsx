@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Oswald, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
+import { CustomCursor } from "@/components/custom-cursor";
+
 const oswald = Oswald({
   variable: "--font-oswald",
   subsets: ["latin"],
@@ -28,6 +30,7 @@ export default function RootLayout({
       <body
         className={`${oswald.variable} ${playfair.variable} antialiased bg-background text-foreground`}
       >
+        <CustomCursor />
         {children}
       </body>
     </html>

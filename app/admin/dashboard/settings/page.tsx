@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Save, Upload, Type, GripVertical } from "lucide-react";
+import { Save, Loader2, Type, GripVertical, MousePointer2, ImagePlus, Upload } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -65,6 +65,9 @@ export default function SettingsPage() {
         works_section_title: "Latest Works",
         marquee_text: "LATEST WORKS",
         marquee_speed: "5",
+
+        // Cursor
+        custom_cursor_url: "",
 
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
@@ -141,6 +144,43 @@ export default function SettingsPage() {
             alert("Error saving settings.");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleCursorUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `cursor-${Date.now()}.${fileExt}`;
+            const filePath = `site-assets/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('project-assets')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+            const publicUrl = data.publicUrl;
+
+            // Persist immediately
+            const { error: dbError } = await supabase
+                .from('site_settings')
+                .upsert({ key: 'custom_cursor_url', value: publicUrl }, { onConflict: 'key' });
+
+            if (dbError) throw dbError;
+
+            setSettings(prev => ({ ...prev, custom_cursor_url: publicUrl }));
+            alert("Cursor updated successfully!");
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Error uploading cursor: ${error.message || "Unknown error"}`);
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -337,6 +377,39 @@ export default function SettingsPage() {
                 </section>
 
 
+                {/* --- CUSTOM CURSOR --- */}
+                <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+                        <MousePointer2 className="text-brand-yellow w-6 h-6" />
+                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Custom Mouse Cursor</h3>
+                    </div>
+
+                    <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
+                        <input
+                            type="file"
+                            accept="image/png, image/svg+xml"
+                            onChange={handleCursorUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                            {settings.custom_cursor_url ? (
+                                <div className="relative w-16 h-16">
+                                    <img src={settings.custom_cursor_url} alt="Custom Cursor" className="w-full h-full object-contain" />
+                                </div>
+                            ) : (
+                                <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
+                                    <ImagePlus className="w-8 h-8 text-gray-500" />
+                                </div>
+                            )}
+                            <div className="text-center">
+                                <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">Upload Cursor Icon</p>
+                                <p className="text-gray-500 text-xs">Recommended: 32x32px or 48x48px PNG/SVG</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
                 {/* --- FOOTER SETTINGS --- */}
                 <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
                     <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
@@ -471,7 +544,7 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
