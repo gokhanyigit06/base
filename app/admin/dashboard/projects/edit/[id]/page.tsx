@@ -3,9 +3,26 @@
 import { useState, useEffect, use } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Save, Loader2, Trash2 } from "lucide-react";
+import { ImagePlus, Save, Loader2, Trash2, GripVertical } from "lucide-react";
 import Image from "next/image";
 import imageCompression from "browser-image-compression";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableBlock({ id, children }: { id: string, children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
+
+    return (
+        <div ref={setNodeRef} style={style} className="relative group">
+            <div {...attributes} {...listeners} className="absolute left-1/2 -top-3 -translate-x-1/2 cursor-grab active:cursor-grabbing z-20 bg-zinc-800 rounded-full p-1 border border-zinc-700 text-gray-400 hover:text-white shadow-xl opacity-0 group-hover:opacity-100 transition-opacity touch-none">
+                <GripVertical className="w-4 h-4" />
+            </div>
+            {children}
+        </div>
+    );
+}
 
 export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -60,7 +77,12 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                     cover_image: data.cover_image || "",
                     is_featured: data.is_featured || false
                 });
-                setContentBlocks(data.content || []);
+                // Ensure every block has an ID for DnD
+                const contentWithIds = (data.content || []).map((b: any) => ({
+                    ...b,
+                    id: b.id || crypto.randomUUID()
+                }));
+                setContentBlocks(contentWithIds);
             }
             setLoading(false);
         };
@@ -132,12 +154,13 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
     // Add Content Block
     const addBlock = (type: 'full' | 'row' | 'slider') => {
+        const id = crypto.randomUUID();
         if (type === 'full') {
-            setContentBlocks([...contentBlocks, { type: 'full', mediaType: 'image', src: '', text: '' }]);
+            setContentBlocks([...contentBlocks, { id, type: 'full', mediaType: 'image', src: '', text: '' }]);
         } else if (type === 'slider') {
-            setContentBlocks([...contentBlocks, { type: 'slider', items: [{ mediaType: 'image', src: '' }] }]);
+            setContentBlocks([...contentBlocks, { id, type: 'slider', items: [{ mediaType: 'image', src: '' }] }]);
         } else {
-            setContentBlocks([...contentBlocks, { type: 'row', layout: '2-even', aspectRatio: 'square', items: [{ mediaType: 'image', src: '' }, { mediaType: 'image', src: '' }] }]);
+            setContentBlocks([...contentBlocks, { id, type: 'row', layout: '2-even', aspectRatio: 'square', items: [{ mediaType: 'image', src: '' }, { mediaType: 'image', src: '' }] }]);
         }
     };
 
@@ -145,6 +168,26 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     const removeBlock = (index: number) => {
         const newBlocks = contentBlocks.filter((_, i) => i !== index);
         setContentBlocks(newBlocks);
+    };
+
+    // DnD Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setContentBlocks((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
     };
 
     // Save Project
@@ -283,165 +326,171 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        {contentBlocks.map((block, index) => (
-                            <div key={index} className="bg-black border border-zinc-800 p-4 rounded-xl relative group">
-                                <button type="button" onClick={() => removeBlock(index)} className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-black rounded-full p-1 border border-red-900">
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-
-                                {block.type === 'full' ? (
-                                    <div className="flex flex-col gap-2">
-                                        <span className="text-xs text-gray-500 uppercase font-bold">Full Width Block</span>
-                                        <div className="h-32 bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden">
-                                            {block.src && (block.src.includes('.mp4') ? <video src={block.src} className="w-full h-full object-cover" /> : <img src={block.src} className="w-full h-full object-cover" />)}
-                                            <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                                                <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index)} />
-                                                {!block.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
-                                            </label>
-                                            {uploading && <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
-                                                <Loader2 className="w-6 h-6 animate-spin text-brand-yellow" />
-                                                {/* Global spinner state used for simplicity */}
-                                            </div>}
-                                        </div>
-                                    </div>
-                                ) : block.type === 'slider' ? (
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                                            <span className="text-xs text-brand-yellow uppercase font-bold tracking-widest">Slider Gallery</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newBlocks = [...contentBlocks];
-                                                    newBlocks[index].items.push({ mediaType: 'image', src: '' });
-                                                    setContentBlocks(newBlocks);
-                                                }}
-                                                className="bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-1 rounded text-[10px] uppercase font-bold border border-zinc-700"
-                                            >
-                                                + Add Slide
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                            <SortableContext items={contentBlocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+                                {contentBlocks.map((block, index) => (
+                                    <SortableBlock key={block.id} id={block.id}>
+                                        <div className="bg-black border border-zinc-800 p-4 rounded-xl relative group">
+                                            <button type="button" onClick={() => removeBlock(index)} className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-black rounded-full p-1 border border-red-900">
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
-                                        </div>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                            {block.items.map((item: any, i: number) => (
-                                                <div key={i} className="aspect-video bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item">
-                                                    {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
-                                                    <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                                                        <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
-                                                        {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
-                                                    </label>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const newBlocks = [...contentBlocks];
-                                                            newBlocks[index].items = newBlocks[index].items.filter((_: any, idx: number) => idx !== i);
-                                                            setContentBlocks(newBlocks);
-                                                        }}
-                                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover/item:opacity-100 transition-all"
-                                                    >
-                                                        <Trash2 className="w-3 h-3" />
-                                                    </button>
-                                                    <span className="absolute bottom-1 right-2 text-[10px] font-mono text-white/50 bg-black/50 px-1 rounded">{i + 1}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                                            <span className="text-xs text-gray-500 uppercase font-bold">Grid Layout</span>
-                                            <div className="flex gap-2">
-                                                {[
-                                                    { id: '2-even', label: '2 Col' },
-                                                    { id: '3-even', label: '3 Col' },
-                                                    { id: '2-left', label: 'Left Wide' },
-                                                    { id: '2-right', label: 'Right Wide' }
-                                                ].map(layout => (
-                                                    <button
-                                                        key={layout.id}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const newBlocks = [...contentBlocks];
-                                                            const isThree = layout.id === '3-even';
-                                                            const currentItems = newBlocks[index].items;
 
-                                                            // Adjust items array size
-                                                            let newItems = [...currentItems];
-                                                            if (isThree && currentItems.length < 3) {
-                                                                newItems.push({ mediaType: 'image', src: '' });
-                                                            } else if (!isThree && currentItems.length > 2) {
-                                                                newItems = newItems.slice(0, 2);
-                                                            }
-
-                                                            newBlocks[index] = { ...newBlocks[index], layout: layout.id, items: newItems };
-                                                            setContentBlocks(newBlocks);
-                                                        }}
-                                                        className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.layout === layout.id ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
-                                                    >
-                                                        {layout.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Aspect Ratio Selector */}
-                                        <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                                            <span className="text-xs text-gray-500 uppercase font-bold">Aspect Ratio</span>
-                                            <div className="flex gap-2">
-                                                {[
-                                                    { id: 'square', label: '1:1' },
-                                                    { id: 'portrait', label: '3:4' },
-                                                    { id: 'landscape', label: '4:3' },
-                                                    { id: 'video', label: '16:9' },
-                                                    { id: 'tall', label: '9:16' }
-                                                ].map(ratio => (
-                                                    <button
-                                                        key={ratio.id}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const newBlocks = [...contentBlocks];
-                                                            newBlocks[index] = { ...newBlocks[index], aspectRatio: ratio.id };
-                                                            setContentBlocks(newBlocks);
-                                                        }}
-                                                        className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.aspectRatio === ratio.id ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
-                                                    >
-                                                        {ratio.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className={`grid gap-4 ${block.layout === '3-even' ? 'grid-cols-3' :
-                                            block.layout === '2-left' ? 'grid-cols-[2fr_1fr]' :
-                                                block.layout === '2-right' ? 'grid-cols-[1fr_2fr]' :
-                                                    'grid-cols-2'
-                                            }`}>
-                                            {block.items.map((item: any, i: number) => {
-                                                const aspectClass =
-                                                    block.aspectRatio === 'portrait' ? 'aspect-[3/4]' :
-                                                        block.aspectRatio === 'landscape' ? 'aspect-[4/3]' :
-                                                            block.aspectRatio === 'video' ? 'aspect-video' :
-                                                                block.aspectRatio === 'tall' ? 'aspect-[9/16]' :
-                                                                    'aspect-square'; // Default
-
-                                                return (
-                                                    <div key={i} className={`w-full ${aspectClass} bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item`}>
-                                                        {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
+                                            {block.type === 'full' ? (
+                                                <div className="flex flex-col gap-2">
+                                                    <span className="text-xs text-brand-yellow font-bold uppercase tracking-widest pl-8">Full Width Block</span>
+                                                    <div className="h-32 bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden">
+                                                        {block.src && (block.src.includes('.mp4') ? <video src={block.src} className="w-full h-full object-cover" /> : <img src={block.src} className="w-full h-full object-cover" />)}
                                                         <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                                                            <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
-                                                            {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                                            <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index)} />
+                                                            {!block.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
                                                         </label>
-                                                        {item.src && (
-                                                            <div className="absolute top-1 right-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                                                {/* Optional clear button could go here */}
-                                                            </div>
-                                                        )}
+                                                        {uploading && <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
+                                                            <Loader2 className="w-6 h-6 animate-spin text-brand-yellow" />
+                                                            {/* Global spinner state used for simplicity */}
+                                                        </div>}
                                                     </div>
-                                                );
-                                            })}
+                                                </div>
+                                            ) : block.type === 'slider' ? (
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2 pl-8">
+                                                        <span className="text-xs text-brand-yellow uppercase font-bold tracking-widest">Slider Gallery</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newBlocks = [...contentBlocks];
+                                                                newBlocks[index].items.push({ mediaType: 'image', src: '' });
+                                                                setContentBlocks(newBlocks);
+                                                            }}
+                                                            className="bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-1 rounded text-[10px] uppercase font-bold border border-zinc-700"
+                                                        >
+                                                            + Add Slide
+                                                        </button>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        {block.items.map((item: any, i: number) => (
+                                                            <div key={i} className="aspect-video bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item">
+                                                                {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
+                                                                <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                                                                    <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
+                                                                    {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                                                </label>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const newBlocks = [...contentBlocks];
+                                                                        newBlocks[index].items = newBlocks[index].items.filter((_: any, idx: number) => idx !== i);
+                                                                        setContentBlocks(newBlocks);
+                                                                    }}
+                                                                    className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover/item:opacity-100 transition-all"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </button>
+                                                                <span className="absolute bottom-1 right-2 text-[10px] font-mono text-white/50 bg-black/50 px-1 rounded">{i + 1}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2 pl-8">
+                                                        <span className="text-xs text-brand-yellow uppercase font-bold tracking-widest">Grid Layout</span>
+                                                        <div className="flex gap-2">
+                                                            {[
+                                                                { id: '2-even', label: '2 Col' },
+                                                                { id: '3-even', label: '3 Col' },
+                                                                { id: '2-left', label: 'Left Wide' },
+                                                                { id: '2-right', label: 'Right Wide' }
+                                                            ].map(layout => (
+                                                                <button
+                                                                    key={layout.id}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const newBlocks = [...contentBlocks];
+                                                                        const isThree = layout.id === '3-even';
+                                                                        const currentItems = newBlocks[index].items;
+
+                                                                        // Adjust items array size
+                                                                        let newItems = [...currentItems];
+                                                                        if (isThree && currentItems.length < 3) {
+                                                                            newItems.push({ mediaType: 'image', src: '' });
+                                                                        } else if (!isThree && currentItems.length > 2) {
+                                                                            newItems = newItems.slice(0, 2);
+                                                                        }
+
+                                                                        newBlocks[index] = { ...newBlocks[index], layout: layout.id, items: newItems };
+                                                                        setContentBlocks(newBlocks);
+                                                                    }}
+                                                                    className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.layout === layout.id ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
+                                                                >
+                                                                    {layout.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Aspect Ratio Selector */}
+                                                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2 pl-8">
+                                                        <span className="text-xs text-gray-500 uppercase font-bold">Aspect Ratio</span>
+                                                        <div className="flex gap-2">
+                                                            {[
+                                                                { id: 'square', label: '1:1' },
+                                                                { id: 'portrait', label: '3:4' },
+                                                                { id: 'landscape', label: '4:3' },
+                                                                { id: 'video', label: '16:9' },
+                                                                { id: 'tall', label: '9:16' }
+                                                            ].map(ratio => (
+                                                                <button
+                                                                    key={ratio.id}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const newBlocks = [...contentBlocks];
+                                                                        newBlocks[index] = { ...newBlocks[index], aspectRatio: ratio.id };
+                                                                        setContentBlocks(newBlocks);
+                                                                    }}
+                                                                    className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${block.aspectRatio === ratio.id ? 'bg-brand-yellow text-black border-brand-yellow' : 'bg-zinc-900 text-gray-400 border-zinc-700 hover:text-white'}`}
+                                                                >
+                                                                    {ratio.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className={`grid gap-4 ${block.layout === '3-even' ? 'grid-cols-3' :
+                                                            block.layout === '2-left' ? 'grid-cols-[2fr_1fr]' :
+                                                                block.layout === '2-right' ? 'grid-cols-[1fr_2fr]' :
+                                                                    'grid-cols-2'
+                                                        }`}>
+                                                        {block.items.map((item: any, i: number) => {
+                                                            const aspectClass =
+                                                                block.aspectRatio === 'portrait' ? 'aspect-[3/4]' :
+                                                                    block.aspectRatio === 'landscape' ? 'aspect-[4/3]' :
+                                                                        block.aspectRatio === 'video' ? 'aspect-video' :
+                                                                            block.aspectRatio === 'tall' ? 'aspect-[9/16]' :
+                                                                                'aspect-square'; // Default
+
+                                                            return (
+                                                                <div key={i} className={`w-full ${aspectClass} bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item`}>
+                                                                    {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
+                                                                    <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                                                                        <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
+                                                                        {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                                                    </label>
+                                                                    {item.src && (
+                                                                        <div className="absolute top-1 right-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                                                            {/* Optional clear button could go here */}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                    </SortableBlock>
+                                ))}
+                            </SortableContext>
+                        </DndContext>
                         {contentBlocks.length === 0 && (
                             <div className="text-center py-8 text-gray-600 italic text-sm border-2 border-dashed border-zinc-800 rounded-xl">
                                 No contents yet. Add blocks above.
