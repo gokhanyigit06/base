@@ -16,6 +16,17 @@ export function FeatureSection() {
     const [headlineEnd, setHeadlineEnd] = useState("HAS ARRIVED.");
     const [description, setDescription] = useState("Awarded Branding & Web Design Agency.");
     const [accentColor, setAccentColor] = useState("#CCF000");
+
+    // Styling States
+    const [taglineColor, setTaglineColor] = useState("#9CA3AF");
+    const [taglineFont, setTaglineFont] = useState("font-mono");
+
+    const [headlineColor, setHeadlineColor] = useState("#FFFFFF");
+    const [headlineFont, setHeadlineFont] = useState("font-oswald");
+
+    const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
+    const [descriptionFont, setDescriptionFont] = useState("font-mono");
+
     const [heroOrder, setHeroOrder] = useState<string[]>(['tagline', 'headline', 'description']);
 
     useEffect(() => {
@@ -33,7 +44,15 @@ export function FeatureSection() {
                     hero_headline_accent: setHeadlineAccent,
                     hero_headline_end: setHeadlineEnd,
                     hero_description: setDescription,
-                    hero_accent_color: setAccentColor
+                    hero_accent_color: setAccentColor,
+
+                    // Styles
+                    hero_tagline_color: setTaglineColor,
+                    hero_tagline_font: setTaglineFont,
+                    hero_headline_color: setHeadlineColor,
+                    hero_headline_font: setHeadlineFont,
+                    hero_description_color: setDescriptionColor,
+                    hero_description_font: setDescriptionFont
                 };
 
                 data.forEach((item: { key: string, value: string }) => {
@@ -63,14 +82,22 @@ export function FeatureSection() {
                     {heroOrder.map((item, index) => {
                         if (item === 'tagline') {
                             return (
-                                <span key={item} className="text-sm font-mono tracking-widest text-gray-400 uppercase">
+                                <span
+                                    key={item}
+                                    className={`text-sm tracking-widest uppercase ${taglineFont}`}
+                                    style={{ color: taglineColor }}
+                                >
                                     {tagline}
                                 </span>
                             );
                         }
                         if (item === 'headline') {
                             return (
-                                <h2 key={item} className="text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase font-oswald flex flex-col">
+                                <h2
+                                    key={item}
+                                    className={`text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase flex flex-col ${headlineFont}`}
+                                    style={{ color: headlineColor }}
+                                >
                                     <span className="block">{headlineStart}</span>
                                     <span
                                         className="font-playfair italic font-light lowercase ml-12 -mt-2"
@@ -84,7 +111,11 @@ export function FeatureSection() {
                         }
                         if (item === 'description') {
                             return (
-                                <p key={item} className="text-sm md:text-base font-mono text-gray-400 tracking-wider uppercase border-l-2 border-brand-red pl-4">
+                                <p
+                                    key={item}
+                                    className={`text-sm md:text-base tracking-wider uppercase border-l-2 border-brand-red pl-4 ${descriptionFont}`}
+                                    style={{ color: descriptionColor }}
+                                >
                                     {description}
                                 </p>
                             );

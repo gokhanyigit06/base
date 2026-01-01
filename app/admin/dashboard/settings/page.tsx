@@ -74,6 +74,14 @@ export default function SettingsPage() {
 
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
+        hero_tagline_color: "#9CA3AF",
+        hero_headline_color: "#FFFFFF",
+        hero_description_color: "#9CA3AF",
+
+        // Fonts
+        hero_tagline_font: "font-mono",
+        hero_headline_font: "font-oswald",
+        hero_description_font: "font-mono",
 
         // Footer Settings
         footer_email: "hello@base.agency",
@@ -102,6 +110,12 @@ export default function SettingsPage() {
                     hero_headline_end: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end: val })),
                     hero_description: (val: string) => setSettings(prev => ({ ...prev, hero_description: val })),
                     hero_accent_color: (val: string) => setSettings(prev => ({ ...prev, hero_accent_color: val })),
+                    hero_tagline_color: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_color: val })),
+                    hero_headline_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_color: val })),
+                    hero_description_color: (val: string) => setSettings(prev => ({ ...prev, hero_description_color: val })),
+                    hero_tagline_font: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_font: val })),
+                    hero_headline_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_font: val })),
+                    hero_description_font: (val: string) => setSettings(prev => ({ ...prev, hero_description_font: val })),
                     footer_email: (val: string) => setSettings(prev => ({ ...prev, footer_email: val })),
                     footer_phone: (val: string) => setSettings(prev => ({ ...prev, footer_phone: val })),
                     footer_address: (val: string) => setSettings(prev => ({ ...prev, footer_address: val })),
@@ -138,7 +152,7 @@ export default function SettingsPage() {
         fetchSettings();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setSettings({ ...settings, [e.target.name]: e.target.value });
     };
 
@@ -316,14 +330,42 @@ export default function SettingsPage() {
                                 {heroOrder.map((itemId) => (
                                     <SortableBlock key={itemId} id={itemId}>
                                         {itemId === 'tagline' && (
-                                            <div>
-                                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Tagline (Small Top Text)</label>
-                                                <input
-                                                    name="hero_tagline"
-                                                    value={settings.hero_tagline}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
-                                                />
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Tagline (Small Top Text)</label>
+                                                    <input
+                                                        name="hero_tagline"
+                                                        value={settings.hero_tagline}
+                                                        onChange={handleChange}
+                                                        className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <div className="flex-1">
+                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font Family</label>
+                                                        <select
+                                                            name="hero_tagline_font"
+                                                            value={settings.hero_tagline_font}
+                                                            onChange={handleChange}
+                                                            className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                                        >
+                                                            <option value="font-sans">Sans Serif</option>
+                                                            <option value="font-serif">Serif (Playfair)</option>
+                                                            <option value="font-mono">Monospace</option>
+                                                            <option value="font-oswald">Oswald (Bold)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                                        <input
+                                                            type="color"
+                                                            name="hero_tagline_color"
+                                                            value={settings.hero_tagline_color}
+                                                            onChange={handleChange}
+                                                            className="h-9 w-20 bg-black border border-zinc-700 rounded-lg cursor-pointer"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                         {itemId === 'headline' && (
@@ -365,22 +407,77 @@ export default function SettingsPage() {
                                                                 name="hero_accent_color"
                                                                 value={settings.hero_accent_color}
                                                                 onChange={handleChange}
-                                                                className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-0"
+                                                                className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] cursor-pointer p-0 m-0 border-none"
                                                             />
                                                         </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-2 grid grid-cols-[1fr_100px] gap-4 pt-4 border-t border-zinc-800 mt-2">
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Headline Font Family</label>
+                                                        <select
+                                                            name="hero_headline_font"
+                                                            value={settings.hero_headline_font}
+                                                            onChange={handleChange}
+                                                            className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                                        >
+                                                            <option value="font-sans">Sans Serif</option>
+                                                            <option value="font-serif">Serif (Playfair)</option>
+                                                            <option value="font-mono">Monospace</option>
+                                                            <option value="font-oswald">Oswald (Bold)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Main Color</label>
+                                                        <input
+                                                            type="color"
+                                                            name="hero_headline_color"
+                                                            value={settings.hero_headline_color}
+                                                            onChange={handleChange}
+                                                            className="h-9 w-full bg-black border border-zinc-700 rounded-lg cursor-pointer"
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
                                         {itemId === 'description' && (
-                                            <div>
-                                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Bottom Description</label>
-                                                <textarea
-                                                    name="hero_description"
-                                                    value={settings.hero_description}
-                                                    onChange={handleChange}
-                                                    className="w-full h-24 bg-black border border-zinc-700 rounded-lg p-3 text-gray-400 placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm resize-none"
-                                                />
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Description Text</label>
+                                                    <textarea
+                                                        name="hero_description"
+                                                        value={settings.hero_description}
+                                                        onChange={handleChange}
+                                                        rows={2}
+                                                        className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <div className="flex-1">
+                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font Family</label>
+                                                        <select
+                                                            name="hero_description_font"
+                                                            value={settings.hero_description_font}
+                                                            onChange={handleChange}
+                                                            className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                                        >
+                                                            <option value="font-sans">Sans Serif</option>
+                                                            <option value="font-serif">Serif (Playfair)</option>
+                                                            <option value="font-mono">Monospace</option>
+                                                            <option value="font-oswald">Oswald (Bold)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                                        <input
+                                                            type="color"
+                                                            name="hero_description_color"
+                                                            value={settings.hero_description_color}
+                                                            onChange={handleChange}
+                                                            className="h-9 w-20 bg-black border border-zinc-700 rounded-lg cursor-pointer"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </SortableBlock>
