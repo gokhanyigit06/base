@@ -2,80 +2,39 @@
 
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 
 interface SiteFooterProps {
     initialSettings?: Record<string, string>;
 }
 
 export function SiteFooter({ initialSettings = {} }: SiteFooterProps) {
-    const [email, setEmail] = useState(initialSettings['footer_email'] || "hello@base.agency");
-    const [phone, setPhone] = useState(initialSettings['footer_phone'] || "+90 (212) 555 0123");
-    const [address, setAddress] = useState(initialSettings['footer_address'] || "Levent, Istanbul\nTurkiye, 34330");
-    const [copyright, setCopyright] = useState(initialSettings['footer_copyright'] || "© 2025 Base Agency. All rights reserved.");
+    const [email, setEmail] = useState(initialSettings['footer_email'] ?? "hello@base.agency");
+    const [phone, setPhone] = useState(initialSettings['footer_phone'] ?? "+90 (212) 555 0123");
+    const [address, setAddress] = useState(initialSettings['footer_address'] ?? "Levent, Istanbul\nTurkiye, 34330");
+    const [copyright, setCopyright] = useState(initialSettings['footer_copyright'] ?? "© 2025 Base Agency. All rights reserved.");
 
     // Socials
-    const [instagram, setInstagram] = useState(initialSettings['social_instagram'] || "#");
-    const [linkedin, setLinkedin] = useState(initialSettings['social_linkedin'] || "#");
-    const [twitter, setTwitter] = useState(initialSettings['social_twitter'] || "#");
-    const [behance, setBehance] = useState(initialSettings['social_behance'] || "#");
+    const [instagram, setInstagram] = useState(initialSettings['social_instagram'] ?? "#");
+    const [linkedin, setLinkedin] = useState(initialSettings['social_linkedin'] ?? "#");
+    const [twitter, setTwitter] = useState(initialSettings['social_twitter'] ?? "#");
+    const [behance, setBehance] = useState(initialSettings['social_behance'] ?? "#");
 
     // CTA Settings
-    const [ctaText1, setCtaText1] = useState(initialSettings['cta_text_1'] || "HAVE AN IDEA?");
-    const [ctaText1Font, setCtaText1Font] = useState(initialSettings['cta_text_1_font'] || "font-oswald");
-    const [ctaText1Color, setCtaText1Color] = useState(initialSettings['cta_text_1_color'] || "#FFFFFF");
+    const [ctaText1, setCtaText1] = useState(initialSettings['cta_text_1'] ?? "HAVE AN IDEA?");
+    const [ctaText1Font, setCtaText1Font] = useState(initialSettings['cta_text_1_font'] ?? "font-oswald");
+    const [ctaText1Color, setCtaText1Color] = useState(initialSettings['cta_text_1_color'] ?? "#FFFFFF");
 
-    const [ctaText2, setCtaText2] = useState(initialSettings['cta_text_2'] || "LET'S BUILD.");
-    const [ctaText2Font, setCtaText2Font] = useState(initialSettings['cta_text_2_font'] || "font-oswald");
-    const [ctaText2Color, setCtaText2Color] = useState(initialSettings['cta_text_2_color'] || "#CCF000");
+    const [ctaText2, setCtaText2] = useState(initialSettings['cta_text_2'] ?? "LET'S BUILD.");
+    const [ctaText2Font, setCtaText2Font] = useState(initialSettings['cta_text_2_font'] ?? "font-oswald");
+    const [ctaText2Color, setCtaText2Color] = useState(initialSettings['cta_text_2_color'] ?? "#CCF000");
 
-    const [ctaBtnText, setCtaBtnText] = useState(initialSettings['cta_btn_text'] || "Start a Project");
-    const [ctaBtnFont, setCtaBtnFont] = useState(initialSettings['cta_btn_font'] || "font-sans");
-    const [ctaBtnTextColor, setCtaBtnTextColor] = useState(initialSettings['cta_btn_text_color'] || "#FFFFFF");
-    const [ctaBtnBgColor, setCtaBtnBgColor] = useState(initialSettings['cta_btn_bg_color'] || "transparent");
-    const [ctaBtnBorderColor, setCtaBtnBorderColor] = useState(initialSettings['cta_btn_border_color'] || "rgba(255,255,255,0.2)");
+    const [ctaBtnText, setCtaBtnText] = useState(initialSettings['cta_btn_text'] ?? "Start a Project");
+    const [ctaBtnFont, setCtaBtnFont] = useState(initialSettings['cta_btn_font'] ?? "font-sans");
+    const [ctaBtnTextColor, setCtaBtnTextColor] = useState(initialSettings['cta_btn_text_color'] ?? "#FFFFFF");
+    const [ctaBtnBgColor, setCtaBtnBgColor] = useState(initialSettings['cta_btn_bg_color'] ?? "transparent");
+    const [ctaBtnBorderColor, setCtaBtnBorderColor] = useState(initialSettings['cta_btn_border_color'] ?? "rgba(255,255,255,0.2)");
 
-
-    useEffect(() => {
-        const fetchSettings = async () => {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('key, value');
-
-            if (data) {
-                const settingsMap: Record<string, (value: string) => void> = {
-                    footer_email: setEmail,
-                    footer_phone: setPhone,
-                    footer_address: setAddress,
-                    footer_copyright: setCopyright,
-                    social_instagram: setInstagram,
-                    social_linkedin: setLinkedin,
-                    social_twitter: setTwitter,
-                    social_behance: setBehance,
-                    // CTA
-                    cta_text_1: setCtaText1,
-                    cta_text_1_font: setCtaText1Font,
-                    cta_text_1_color: setCtaText1Color,
-                    cta_text_2: setCtaText2,
-                    cta_text_2_font: setCtaText2Font,
-                    cta_text_2_color: setCtaText2Color,
-                    cta_btn_text: setCtaBtnText,
-                    cta_btn_font: setCtaBtnFont,
-                    cta_btn_text_color: setCtaBtnTextColor,
-                    cta_btn_bg_color: setCtaBtnBgColor,
-                    cta_btn_border_color: setCtaBtnBorderColor,
-                };
-
-                data.forEach((item: { key: string, value: string }) => {
-                    if (settingsMap[item.key]) {
-                        settingsMap[item.key](item.value);
-                    }
-                });
-            }
-        };
-        fetchSettings();
-    }, []);
 
     return (
         <footer className="w-full bg-black text-white pt-24 pb-12 px-6 md:px-12 rounded-t-[3rem] -mt-12 relative z-10 border-t border-white/10">

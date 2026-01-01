@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
 
 interface FeatureSectionProps {
     initialSettings?: Record<string, string>;
@@ -13,23 +12,23 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
     const [isVideoOpen, setIsVideoOpen] = useState(false);
 
     // Dynamic Content State
-    const [videoUrl, setVideoUrl] = useState(initialSettings['homepage_video_url'] || "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
-    const [tagline, setTagline] = useState(initialSettings['hero_tagline'] || "LOOK AHEAD");
-    const [headlineStart, setHeadlineStart] = useState(initialSettings['hero_headline_start'] || "IT STARTS AT THE BASE");
-    const [headlineAccent, setHeadlineAccent] = useState(initialSettings['hero_headline_accent'] || "future");
-    const [headlineEnd, setHeadlineEnd] = useState(initialSettings['hero_headline_end'] || "HAS ARRIVED.");
-    const [description, setDescription] = useState(initialSettings['hero_description'] || "Awarded Branding & Web Design Agency.");
-    const [accentColor, setAccentColor] = useState(initialSettings['hero_accent_color'] || "#CCF000");
+    const [videoUrl, setVideoUrl] = useState(initialSettings['homepage_video_url'] ?? "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_25fps.mp4");
+    const [tagline, setTagline] = useState(initialSettings['hero_tagline'] ?? "LOOK AHEAD");
+    const [headlineStart, setHeadlineStart] = useState(initialSettings['hero_headline_start'] ?? "IT STARTS AT THE BASE");
+    const [headlineAccent, setHeadlineAccent] = useState(initialSettings['hero_headline_accent'] ?? "future");
+    const [headlineEnd, setHeadlineEnd] = useState(initialSettings['hero_headline_end'] ?? "HAS ARRIVED.");
+    const [description, setDescription] = useState(initialSettings['hero_description'] ?? "Awarded Branding & Web Design Agency.");
+    const [accentColor, setAccentColor] = useState(initialSettings['hero_accent_color'] ?? "#CCF000");
 
     // Styling States
-    const [taglineColor, setTaglineColor] = useState(initialSettings['hero_tagline_color'] || "#9CA3AF");
-    const [taglineFont, setTaglineFont] = useState(initialSettings['hero_tagline_font'] || "font-mono");
+    const [taglineColor, setTaglineColor] = useState(initialSettings['hero_tagline_color'] ?? "#9CA3AF");
+    const [taglineFont, setTaglineFont] = useState(initialSettings['hero_tagline_font'] ?? "font-mono");
 
-    const [headlineColor, setHeadlineColor] = useState(initialSettings['hero_headline_color'] || "#FFFFFF");
-    const [headlineFont, setHeadlineFont] = useState(initialSettings['hero_headline_font'] || "font-oswald");
+    const [headlineColor, setHeadlineColor] = useState(initialSettings['hero_headline_color'] ?? "#FFFFFF");
+    const [headlineFont, setHeadlineFont] = useState(initialSettings['hero_headline_font'] ?? "font-oswald");
 
-    const [descriptionColor, setDescriptionColor] = useState(initialSettings['hero_description_color'] || "#9CA3AF");
-    const [descriptionFont, setDescriptionFont] = useState(initialSettings['hero_description_font'] || "font-mono");
+    const [descriptionColor, setDescriptionColor] = useState(initialSettings['hero_description_color'] ?? "#9CA3AF");
+    const [descriptionFont, setDescriptionFont] = useState(initialSettings['hero_description_font'] ?? "font-mono");
 
     const [heroOrder, setHeroOrder] = useState<string[]>(() => {
         try {
@@ -38,50 +37,6 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
             return ['tagline', 'headline', 'description'];
         }
     });
-
-    useEffect(() => {
-        const fetchSettings = async () => {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('key, value');
-
-            if (data) {
-                // Map settings to state
-                const settingsMap: Record<string, (value: string) => void> = {
-                    homepage_video_url: setVideoUrl,
-                    hero_tagline: setTagline,
-                    hero_headline_start: setHeadlineStart,
-                    hero_headline_accent: setHeadlineAccent,
-                    hero_headline_end: setHeadlineEnd,
-                    hero_description: setDescription,
-                    hero_accent_color: setAccentColor,
-
-                    // Styles
-                    hero_tagline_color: setTaglineColor,
-                    hero_tagline_font: setTaglineFont,
-                    hero_headline_color: setHeadlineColor,
-                    hero_headline_font: setHeadlineFont,
-                    hero_description_color: setDescriptionColor,
-                    hero_description_font: setDescriptionFont
-                };
-
-                data.forEach((item: { key: string, value: string }) => {
-                    if (settingsMap[item.key] && typeof settingsMap[item.key] === 'function') {
-                        // Typescript might complain about function type matching, calling simply:
-                        (settingsMap[item.key] as any)(item.value);
-                    }
-                    if (item.key === 'hero_elements_order') {
-                        try {
-                            setHeroOrder(JSON.parse(item.value));
-                        } catch (e) {
-                            console.error("Failed to parse hero order", e);
-                        }
-                    }
-                });
-            }
-        };
-        fetchSettings();
-    }, []);
 
     return (
         <>
