@@ -244,6 +244,21 @@ export default function SettingsPage() {
         setSettings({ ...settings, [e.target.name]: e.target.value });
     };
 
+    // Helper to render font options with custom fonts
+    const renderFontOptions = () => (
+        <>
+            <option value="font-sans">Sans Serif</option>
+            <option value="font-serif">Serif (Playfair)</option>
+            <option value="font-mono">Monospace</option>
+            <option value="font-oswald">Oswald (Bold)</option>
+            {customFonts.map((font) => (
+                <option key={font.id} value={font.font_family}>
+                    {font.name}
+                </option>
+            ))}
+        </>
+    );
+
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -551,11 +566,7 @@ export default function SettingsPage() {
                                                             onChange={handleChange}
                                                             className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
                                                         >
-                                                            <option value="font-sans">Sans Serif</option>
-                                                            <option value="font-serif">Serif (Playfair)</option>
-                                                            <option value="font-mono">Monospace</option>
-                                                            <option value="font-oswald">Oswald (Bold)</option>
-                                                            <option value="font-custom">Custom Font (Uploaded)</option>
+                                                            {renderFontOptions()}
                                                         </select>
                                                     </div>
                                                     <div>
@@ -624,11 +635,7 @@ export default function SettingsPage() {
                                                             onChange={handleChange}
                                                             className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
                                                         >
-                                                            <option value="font-sans">Sans Serif</option>
-                                                            <option value="font-serif">Serif (Playfair)</option>
-                                                            <option value="font-mono">Monospace</option>
-                                                            <option value="font-oswald">Oswald (Bold)</option>
-                                                            <option value="font-custom">Custom Font (Uploaded)</option>
+                                                            {renderFontOptions()}
                                                         </select>
                                                     </div>
                                                     <div>
@@ -665,11 +672,7 @@ export default function SettingsPage() {
                                                             onChange={handleChange}
                                                             className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
                                                         >
-                                                            <option value="font-sans">Sans Serif</option>
-                                                            <option value="font-serif">Serif (Playfair)</option>
-                                                            <option value="font-mono">Monospace</option>
-                                                            <option value="font-oswald">Oswald (Bold)</option>
-                                                            <option value="font-custom">Custom Font (Uploaded)</option>
+                                                            {renderFontOptions()}
                                                         </select>
                                                     </div>
                                                     <div>
@@ -774,11 +777,7 @@ export default function SettingsPage() {
                                             onChange={handleChange}
                                             className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
                                         >
-                                            <option value="font-sans">Sans Serif</option>
-                                            <option value="font-serif">Serif (Playfair)</option>
-                                            <option value="font-mono">Monospace</option>
-                                            <option value="font-oswald">Oswald (Bold)</option>
-                                            <option value="font-custom">Custom Font (Uploaded)</option>
+                                            {renderFontOptions()}
                                         </select>
                                     </div>
                                     <div className="md:col-span-2">
@@ -816,11 +815,7 @@ export default function SettingsPage() {
                                 <div className="md:col-span-4">
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
                                     <select name="cta_text_1_font" value={settings.cta_text_1_font} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow">
-                                        <option value="font-sans">Sans Serif</option>
-                                        <option value="font-serif">Serif (Playfair)</option>
-                                        <option value="font-mono">Monospace</option>
-                                        <option value="font-oswald">Oswald (Bold)</option>
-                                        <option value="font-custom">Custom Font (Uploaded)</option>
+                                        {renderFontOptions()}
                                     </select>
                                 </div>
                                 <div className="md:col-span-2">
@@ -840,11 +835,7 @@ export default function SettingsPage() {
                                 <div className="md:col-span-4">
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
                                     <select name="cta_text_2_font" value={settings.cta_text_2_font} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow">
-                                        <option value="font-sans">Sans Serif</option>
-                                        <option value="font-serif">Serif (Playfair)</option>
-                                        <option value="font-mono">Monospace</option>
-                                        <option value="font-oswald">Oswald (Bold)</option>
-                                        <option value="font-custom">Custom Font (Uploaded)</option>
+                                        {renderFontOptions()}
                                     </select>
                                 </div>
                                 <div className="md:col-span-2">
@@ -865,11 +856,7 @@ export default function SettingsPage() {
                                 <div className="md:col-span-4">
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
                                     <select name="cta_btn_font" value={settings.cta_btn_font} onChange={handleChange} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow">
-                                        <option value="font-sans">Sans Serif</option>
-                                        <option value="font-serif">Serif (Playfair)</option>
-                                        <option value="font-mono">Monospace</option>
-                                        <option value="font-oswald">Oswald (Bold)</option>
-                                        <option value="font-custom">Custom Font (Uploaded)</option>
+                                        {renderFontOptions()}
                                     </select>
                                 </div>
                                 <div className="md:col-span-2">
@@ -897,18 +884,22 @@ export default function SettingsPage() {
                 </section>
 
 
-                {/* --- CUSTOM FONT --- */}
+                {/* --- FONT MANAGER --- */}
                 <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
-                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
-                        <Type className="text-brand-yellow w-6 h-6" />
-                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Custom Global Font</h3>
+                    <div className="flex items-center justify-between mb-6 border-b border-zinc-800 pb-4">
+                        <div className="flex items-center gap-4">
+                            <Type className="text-brand-yellow w-6 h-6" />
+                            <h3 className="text-xl font-bold text-white uppercase tracking-wider">Font Manager</h3>
+                        </div>
+                        <span className="text-xs text-gray-500 font-mono">{customFonts.length} Custom Fonts</span>
                     </div>
 
-                    <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
+                    {/* Upload New Font */}
+                    <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group mb-6">
                         <input
                             type="file"
                             accept=".ttf, .otf, .woff, .woff2"
-                            onChange={handleFontUpload}
+                            onChange={handleCustomFontUpload}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                         />
                         <div className="flex flex-col items-center justify-center gap-4 relative z-10">
@@ -917,14 +908,46 @@ export default function SettingsPage() {
                             </div>
                             <div className="text-center">
                                 <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">
-                                    {settings.custom_font_url ? "Font Uploaded (Replace)" : "Upload Font File"}
+                                    Upload New Font
                                 </p>
-                                <p className="text-gray-500 text-xs text-wrap break-all max-w-xs mx-auto">
-                                    {settings.custom_font_url ? settings.custom_font_url.split('/').pop() : ".ttf, .otf, .woff, .woff2"}
+                                <p className="text-gray-500 text-xs">
+                                    .ttf, .otf, .woff, .woff2
                                 </p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Font List */}
+                    {customFonts.length > 0 && (
+                        <div className="space-y-3">
+                            <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Uploaded Fonts</h4>
+                            {customFonts.map((font) => (
+                                <div key={font.id} className="bg-black border border-zinc-800 rounded-xl p-4 flex items-center justify-between group hover:border-brand-yellow transition-colors">
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div className="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center">
+                                            <Type className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-white font-bold text-sm">{font.name}</p>
+                                            <p className="text-gray-500 text-xs font-mono">{font.font_family}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteCustomFont(font.id, font.name)}
+                                        className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {customFonts.length === 0 && (
+                        <div className="text-center py-8">
+                            <p className="text-gray-500 text-sm">No custom fonts uploaded yet.</p>
+                        </div>
+                    )}
                 </section>
 
 

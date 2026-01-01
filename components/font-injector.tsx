@@ -3,45 +3,53 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+interface CustomFont {
+    id: string;
+    name: string;
+    font_url: string;
+    font_family: string;
+}
+
 export function FontInjector() {
-    const [fontUrl, setFontUrl] = useState<string | null>(null);
+    const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
 
     useEffect(() => {
-        const fetchFont = async () => {
+        const fetchFonts = async () => {
             const { data } = await supabase
-                .from('site_settings')
-                .select('value')
-                .eq('key', 'custom_font_url')
-                .single();
+                .from('custom_fonts')
+                .select('*');
 
-            if (data?.value) {
-                setFontUrl(data.value);
+            if (data) {
+                setCustomFonts(data);
             }
         };
-        fetchFont();
+        fetchFonts();
     }, []);
 
-    if (!fontUrl) return null;
+    if (customFonts.length === 0) return null;
+
+    // Generate @font-face rules for each custom font
+    const fontFaceRules = customFonts.map((font) => `
+        @font-face {
+            font-family: '${font.font_family}';
+            src: url('${font.font_url}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: '${font.font_family}';
+            src: url('${font.font_url}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+        .${font.font_family} {
+            font-family: '${font.font_family}', sans-serif !important;
+        }
+    `).join('\n');
 
     return (
-        <style jsx global>{`
-            @font-face {
-                font-family: 'CustomFont';
-                src: url('${fontUrl}') format('truetype');
-                font-weight: normal;
-                font-style: normal;
-                font-display: swap;
-            }
-            @font-face {
-                font-family: 'CustomFont';
-                src: url('${fontUrl}') format('truetype');
-                font-weight: bold;
-                font-style: normal;
-                font-display: swap;
-            }
-            .font-custom {
-                font-family: 'CustomFont', sans-serif !important;
-            }
-        `}</style>
+        <style jsx global>{fontFaceRules}</style>
     );
 }
