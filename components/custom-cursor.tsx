@@ -23,9 +23,6 @@ export function CustomCursor() {
     const cursorXSpring = useSpring(cursorX, springConfig);
     const cursorYSpring = useSpring(cursorY, springConfig);
 
-    // If pathname starts with /admin, return null to disable custom cursor
-    if (pathname?.startsWith('/admin')) return null;
-
     const [isMobile, setIsMobile] = useState(true); // Default to true to prevent flash on mobile
 
     useEffect(() => {
@@ -41,9 +38,9 @@ export function CustomCursor() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    if (isMobile) return null;
-
     useEffect(() => {
+        if (isMobile) return; // Tiny optimization: Don't fetch/listen if mobile
+
         const fetchCursor = async () => {
             const { data } = await supabase
                 .from('site_settings')
@@ -88,8 +85,11 @@ export function CustomCursor() {
             document.body.removeEventListener("mouseenter", handleMouseEnter);
             document.body.removeEventListener("mouseleave", handleMouseLeave);
         };
-    }, [cursorX, cursorY]);
+    }, [cursorX, cursorY, isMobile]); // Added isMobile to dependency array
 
+    // Early returns MOVED HERE (after all hooks)
+    if (pathname?.startsWith('/admin')) return null;
+    if (isMobile) return null;
     if (!cursorUrl) return null;
 
     const currentCursor = (isHovering && hoverCursorUrl) ? hoverCursorUrl : cursorUrl;
@@ -102,7 +102,6 @@ body, a, button, input, select, textarea {
     cursor: none!important;
 }
 `}</style>
-
             <motion.div
                 className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference flex items-center justify-center"
                 style={{
