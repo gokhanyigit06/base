@@ -277,7 +277,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                 </>
             )}
 
-            <SiteFooter />
+            <SiteFooter initialSettings={{}} />
         </main >
     );
 }
