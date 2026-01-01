@@ -2,8 +2,49 @@
 
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export function SiteFooter() {
+    const [email, setEmail] = useState("hello@base.agency");
+    const [phone, setPhone] = useState("+90 (212) 555 0123");
+    const [address, setAddress] = useState("Levent, Istanbul\nTurkiye, 34330");
+    const [copyright, setCopyright] = useState("© 2025 Base Agency. All rights reserved.");
+
+    // Socials
+    const [instagram, setInstagram] = useState("#");
+    const [linkedin, setLinkedin] = useState("#");
+    const [twitter, setTwitter] = useState("#");
+    const [behance, setBehance] = useState("#");
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const { data } = await supabase
+                .from('site_settings')
+                .select('key, value');
+
+            if (data) {
+                const settingsMap: Record<string, (value: string) => void> = {
+                    footer_email: setEmail,
+                    footer_phone: setPhone,
+                    footer_address: setAddress,
+                    footer_copyright: setCopyright,
+                    social_instagram: setInstagram,
+                    social_linkedin: setLinkedin,
+                    social_twitter: setTwitter,
+                    social_behance: setBehance
+                };
+
+                data.forEach((item: { key: string, value: string }) => {
+                    if (settingsMap[item.key]) {
+                        settingsMap[item.key](item.value);
+                    }
+                });
+            }
+        };
+        fetchSettings();
+    }, []);
+
     return (
         <footer className="w-full bg-black text-white pt-24 pb-12 px-6 md:px-12 rounded-t-[3rem] -mt-12 relative z-10 border-t border-white/10">
             <div className="max-w-screen-2xl mx-auto flex flex-col">
@@ -38,8 +79,12 @@ export function SiteFooter() {
                     <div className="flex flex-col gap-4">
                         <span className="text-white font-bold mb-2 uppercase">Visit Us</span>
                         <p>
-                            Levent, Istanbul<br />
-                            Turkiye, 34330
+                            {address.split('\n').map((line, i) => (
+                                <span key={i}>
+                                    {line}
+                                    <br />
+                                </span>
+                            ))}
                         </p>
                     </div>
 
@@ -47,21 +92,21 @@ export function SiteFooter() {
                     <div className="flex flex-col gap-4">
                         <span className="text-white font-bold mb-2 uppercase">Follow</span>
                         <div className="flex flex-col gap-2">
-                            <Link href="#" className="hover:text-brand-yellow transition-colors">Instagram</Link>
-                            <Link href="#" className="hover:text-brand-yellow transition-colors">LinkedIn</Link>
-                            <Link href="#" className="hover:text-brand-yellow transition-colors">Twitter / X</Link>
-                            <Link href="#" className="hover:text-brand-yellow transition-colors">Behance</Link>
+                            <Link href={instagram} target="_blank" className="hover:text-brand-yellow transition-colors">Instagram</Link>
+                            <Link href={linkedin} target="_blank" className="hover:text-brand-yellow transition-colors">LinkedIn</Link>
+                            <Link href={twitter} target="_blank" className="hover:text-brand-yellow transition-colors">Twitter / X</Link>
+                            <Link href={behance} target="_blank" className="hover:text-brand-yellow transition-colors">Behance</Link>
                         </div>
                     </div>
 
                     {/* Column 3: Contact */}
                     <div className="flex flex-col gap-4">
                         <span className="text-white font-bold mb-2 uppercase">Contact</span>
-                        <Link href="mailto:hello@base.agency" className="text-xl text-white hover:text-brand-yellow transition-colors font-bold font-sans">
-                            hello@base.agency
+                        <Link href={`mailto:${email}`} className="text-xl text-white hover:text-brand-yellow transition-colors font-bold font-sans">
+                            {email}
                         </Link>
                         <span className="text-white hover:text-brand-yellow transition-colors cursor-pointer">
-                            +90 (212) 555 0123
+                            {phone}
                         </span>
                     </div>
 
@@ -78,7 +123,7 @@ export function SiteFooter() {
 
                 {/* Bottom Bar */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-24 pt-8 border-t border-white/10 text-xs text-gray-600 uppercase">
-                    <span>© 2025 Base Agency. All rights reserved.</span>
+                    <span>{copyright}</span>
                     <div className="flex gap-8">
                         <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
                         <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>

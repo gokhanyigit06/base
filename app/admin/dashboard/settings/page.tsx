@@ -23,6 +23,16 @@ export default function SettingsPage() {
 
         // Colors (Hex defaults matching brand colors)
         hero_accent_color: "#CCF000", // brand-yellow
+
+        // Footer Settings
+        footer_email: "hello@base.agency",
+        footer_phone: "+90 (212) 555 0123",
+        footer_address: "Levent, Istanbul\nTurkiye, 34330",
+        footer_copyright: "© 2025 Base Agency. All rights reserved.",
+        social_instagram: "#",
+        social_linkedin: "#",
+        social_twitter: "#",
+        social_behance: "#",
     });
 
     // Fetch initial settings
@@ -207,6 +217,104 @@ export default function SettingsPage() {
                             />
                         </div>
 
+                    </div>
+                </section>
+
+
+                {/* --- FOOTER SETTINGS --- */}
+                <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+                        <Type className="text-brand-yellow w-6 h-6" />
+                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Footer Settings</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        {/* Contact Info */}
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Email Address</label>
+                            <input
+                                name="footer_email"
+                                value={settings.footer_email}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Phone Number</label>
+                            <input
+                                name="footer_phone"
+                                value={settings.footer_phone}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                            />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Address</label>
+                            <textarea
+                                name="footer_address"
+                                value={settings.footer_address}
+                                onChange={handleChange}
+                                className="w-full h-24 bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm resize-none"
+                            />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Copyright Text</label>
+                            <input
+                                name="footer_copyright"
+                                value={settings.footer_copyright}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-mono text-sm"
+                            />
+                        </div>
+
+                        {/* Social Links */}
+                        <div className="col-span-2 mt-4">
+                            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-zinc-800 pb-2">Social Media Links</h4>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Instagram URL</label>
+                            <input
+                                name="social_instagram"
+                                value={settings.social_instagram}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none text-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">LinkedIn URL</label>
+                            <input
+                                name="social_linkedin"
+                                value={settings.social_linkedin}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none text-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Twitter / X URL</label>
+                            <input
+                                name="social_twitter"
+                                value={settings.social_twitter}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none text-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Behance URL</label>
+                            <input
+                                name="social_behance"
+                                value={settings.social_behance}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none text-sm"
+                            />
+                        </div>
                     </div>
                 </section>
 

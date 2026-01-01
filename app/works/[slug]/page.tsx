@@ -98,7 +98,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                 <>
                     {/* Cover Image Section */}
                     <section className="w-full px-6 md:px-12 pt-32 pb-8">
-                        <div className="relative w-full aspect-video md:aspect-[2.4/1] rounded-[2rem] overflow-hidden bg-zinc-100">
+                        <div className="relative w-full aspect-[2/1] rounded-[2rem] overflow-hidden bg-zinc-100">
                             {project.cover_image && (
                                 <Image
                                     src={project.cover_image}
