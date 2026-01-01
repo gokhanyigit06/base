@@ -3,6 +3,7 @@ import { Oswald, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 import { CustomCursor } from "@/components/custom-cursor";
+import { FontInjector } from "@/components/font-injector";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body
         className={`${oswald.variable} ${playfair.variable} antialiased bg-background text-foreground`}
       >
+        <FontInjector />
         <CustomCursor />
         {children}
       </body>

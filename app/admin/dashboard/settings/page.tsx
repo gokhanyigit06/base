@@ -79,6 +79,7 @@ export default function SettingsPage() {
         hero_description_color: "#9CA3AF",
 
         // Fonts
+        custom_font_url: "",
         hero_tagline_font: "font-mono",
         hero_headline_font: "font-oswald",
         hero_description_font: "font-mono",
@@ -116,6 +117,7 @@ export default function SettingsPage() {
                     hero_tagline_font: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_font: val })),
                     hero_headline_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_font: val })),
                     hero_description_font: (val: string) => setSettings(prev => ({ ...prev, hero_description_font: val })),
+                    custom_font_url: (val: string) => setSettings(prev => ({ ...prev, custom_font_url: val })),
                     footer_email: (val: string) => setSettings(prev => ({ ...prev, footer_email: val })),
                     footer_phone: (val: string) => setSettings(prev => ({ ...prev, footer_phone: val })),
                     footer_address: (val: string) => setSettings(prev => ({ ...prev, footer_address: val })),
@@ -259,6 +261,43 @@ export default function SettingsPage() {
         }
     };
 
+    const handleFontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `font-${Date.now()}.${fileExt}`;
+            const filePath = `site-assets/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('project-assets')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+            const publicUrl = data.publicUrl;
+
+            // Persist immediately
+            const { error: dbError } = await supabase
+                .from('site_settings')
+                .upsert({ key: 'custom_font_url', value: publicUrl }, { onConflict: 'key' });
+
+            if (dbError) throw dbError;
+
+            setSettings(prev => ({ ...prev, custom_font_url: publicUrl }));
+            alert("Custom Font uploaded successfully! Please refresh the page to see changes.");
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Error uploading font: ${error.message || "Unknown error"}`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -353,6 +392,7 @@ export default function SettingsPage() {
                                                             <option value="font-serif">Serif (Playfair)</option>
                                                             <option value="font-mono">Monospace</option>
                                                             <option value="font-oswald">Oswald (Bold)</option>
+                                                            <option value="font-custom">Custom Font (Uploaded)</option>
                                                         </select>
                                                     </div>
                                                     <div>
@@ -425,6 +465,7 @@ export default function SettingsPage() {
                                                             <option value="font-serif">Serif (Playfair)</option>
                                                             <option value="font-mono">Monospace</option>
                                                             <option value="font-oswald">Oswald (Bold)</option>
+                                                            <option value="font-custom">Custom Font (Uploaded)</option>
                                                         </select>
                                                     </div>
                                                     <div>
@@ -465,6 +506,7 @@ export default function SettingsPage() {
                                                             <option value="font-serif">Serif (Playfair)</option>
                                                             <option value="font-mono">Monospace</option>
                                                             <option value="font-oswald">Oswald (Bold)</option>
+                                                            <option value="font-custom">Custom Font (Uploaded)</option>
                                                         </select>
                                                     </div>
                                                     <div>
@@ -531,6 +573,37 @@ export default function SettingsPage() {
                             className="w-full accent-brand-yellow cursor-pointer"
                         />
                         <p className="text-[10px] text-gray-600 mt-1">Controls how fast the text moves when scrolling.</p>
+                    </div>
+                </section>
+
+
+                {/* --- CUSTOM FONT --- */}
+                <section className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+                        <Type className="text-brand-yellow w-6 h-6" />
+                        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Custom Global Font</h3>
+                    </div>
+
+                    <div className="border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center hover:border-brand-yellow transition-colors cursor-pointer relative group">
+                        <input
+                            type="file"
+                            accept=".ttf, .otf, .woff, .woff2"
+                            onChange={handleFontUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                            <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
+                                <span className="text-2xl font-bold text-gray-400">Aa</span>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-white font-bold uppercase tracking-widest text-sm mb-1">
+                                    {settings.custom_font_url ? "Font Uploaded (Replace)" : "Upload Font File"}
+                                </p>
+                                <p className="text-gray-500 text-xs text-wrap break-all max-w-xs mx-auto">
+                                    {settings.custom_font_url ? settings.custom_font_url.split('/').pop() : ".ttf, .otf, .woff, .woff2"}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
