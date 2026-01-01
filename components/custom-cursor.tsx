@@ -26,6 +26,23 @@ export function CustomCursor() {
     // If pathname starts with /admin, return null to disable custom cursor
     if (pathname?.startsWith('/admin')) return null;
 
+    const [isMobile, setIsMobile] = useState(true); // Default to true to prevent flash on mobile
+
+    useEffect(() => {
+        // Check if device is mobile or touch
+        const checkMobile = () => {
+            const isTouch = window.matchMedia("(pointer: coarse)").matches;
+            const isSmall = window.innerWidth < 768; // Tailwind md breakpoint
+            setIsMobile(isTouch || isSmall);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    if (isMobile) return null;
+
     useEffect(() => {
         const fetchCursor = async () => {
             const { data } = await supabase
