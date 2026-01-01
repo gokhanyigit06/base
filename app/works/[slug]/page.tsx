@@ -3,6 +3,7 @@
 import { use, useRef, useState, useEffect } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ProjectSlider } from "@/components/project-slider";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
@@ -238,6 +239,12 @@ export default function ProjectDetail({ params }: { params: Promise<{ slug: stri
                                                 </div>
                                             );
                                         })}
+                                    </div>
+                                );
+                            } else if (block.type === 'slider') {
+                                return (
+                                    <div key={index}>
+                                        <ProjectSlider items={block.items} />
                                     </div>
                                 );
                             }

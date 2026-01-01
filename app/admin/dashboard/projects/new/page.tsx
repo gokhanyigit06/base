@@ -103,9 +103,12 @@ export default function NewProjectPage() {
     };
 
     // Add Content Block
-    const addBlock = (type: 'full' | 'row') => {
+    // Add Content Block
+    const addBlock = (type: 'full' | 'row' | 'slider') => {
         if (type === 'full') {
             setContentBlocks([...contentBlocks, { type: 'full', mediaType: 'image', src: '', text: '' }]);
+        } else if (type === 'slider') {
+            setContentBlocks([...contentBlocks, { type: 'slider', items: [{ mediaType: 'image', src: '' }] }]);
         } else {
             setContentBlocks([...contentBlocks, { type: 'row', layout: '2-even', aspectRatio: 'square', items: [{ mediaType: 'image', src: '' }, { mediaType: 'image', src: '' }] }]);
         }
@@ -246,6 +249,9 @@ export default function NewProjectPage() {
                             <button type="button" onClick={() => addBlock('row')} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1 rounded text-xs uppercase font-bold border border-zinc-700">
                                 + 2 Columns
                             </button>
+                            <button type="button" onClick={() => addBlock('slider')} className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1 rounded text-xs uppercase font-bold border border-zinc-700">
+                                + Slider
+                            </button>
                         </div>
                     </div>
 
@@ -269,6 +275,46 @@ export default function NewProjectPage() {
                                                 <Loader2 className="w-6 h-6 animate-spin text-brand-yellow" />
                                                 {/* Global spinner state used for simplicity, ideally local */}
                                             </div>}
+                                        </div>
+                                    </div>
+                                ) : block.type === 'slider' ? (
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                                            <span className="text-xs text-brand-yellow uppercase font-bold tracking-widest">Slider Gallery</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newBlocks = [...contentBlocks];
+                                                    newBlocks[index].items.push({ mediaType: 'image', src: '' });
+                                                    setContentBlocks(newBlocks);
+                                                }}
+                                                className="bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-1 rounded text-[10px] uppercase font-bold border border-zinc-700"
+                                            >
+                                                + Add Slide
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            {block.items.map((item: any, i: number) => (
+                                                <div key={i} className="aspect-video bg-zinc-900 rounded border border-zinc-800 flex items-center justify-center relative overflow-hidden group/item">
+                                                    {item.src && (item.src.includes('.mp4') ? <video src={item.src} className="w-full h-full object-cover" /> : <img src={item.src} className="w-full h-full object-cover" />)}
+                                                    <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                                                        <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => handleImageUpload(e, false, index, i)} />
+                                                        {!item.src && <ImagePlus className="w-6 h-6 text-gray-500" />}
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newBlocks = [...contentBlocks];
+                                                            newBlocks[index].items = newBlocks[index].items.filter((_: any, idx: number) => idx !== i);
+                                                            setContentBlocks(newBlocks);
+                                                        }}
+                                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover/item:opacity-100 transition-all"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                    <span className="absolute bottom-1 right-2 text-[10px] font-mono text-white/50 bg-black/50 px-1 rounded">{i + 1}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 ) : (
