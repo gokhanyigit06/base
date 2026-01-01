@@ -27,6 +27,16 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
     const [headlineColor, setHeadlineColor] = useState(initialSettings['hero_headline_color'] ?? "#FFFFFF");
     const [headlineFont, setHeadlineFont] = useState(initialSettings['hero_headline_font'] ?? "font-oswald");
 
+    // Individual headline part fonts and colors
+    const [headlineStartFont, setHeadlineStartFont] = useState(initialSettings['hero_headline_start_font'] ?? initialSettings['hero_headline_font'] ?? "font-oswald");
+    const [headlineStartColor, setHeadlineStartColor] = useState(initialSettings['hero_headline_start_color'] ?? initialSettings['hero_headline_color'] ?? "#FFFFFF");
+
+    const [headlineAccentFont, setHeadlineAccentFont] = useState(initialSettings['hero_headline_accent_font'] ?? "font-serif");
+    const [headlineAccentColor, setHeadlineAccentColor] = useState(initialSettings['hero_headline_accent_color'] ?? initialSettings['hero_accent_color'] ?? "#CCF000");
+
+    const [headlineEndFont, setHeadlineEndFont] = useState(initialSettings['hero_headline_end_font'] ?? initialSettings['hero_headline_font'] ?? "font-oswald");
+    const [headlineEndColor, setHeadlineEndColor] = useState(initialSettings['hero_headline_end_color'] ?? initialSettings['hero_headline_color'] ?? "#FFFFFF");
+
     const [descriptionColor, setDescriptionColor] = useState(initialSettings['hero_description_color'] ?? "#9CA3AF");
     const [descriptionFont, setDescriptionFont] = useState(initialSettings['hero_description_font'] ?? "font-mono");
 
@@ -60,17 +70,26 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
                             return (
                                 <h2
                                     key={item}
-                                    className={`text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase flex flex-col ${headlineFont}`}
-                                    style={{ color: headlineColor }}
+                                    className="text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase flex flex-col"
                                 >
-                                    <span className="block">{headlineStart}</span>
                                     <span
-                                        className="font-playfair italic font-light lowercase ml-12 -mt-2"
-                                        style={{ color: accentColor }}
+                                        className={`block ${headlineStartFont}`}
+                                        style={{ color: headlineStartColor }}
+                                    >
+                                        {headlineStart}
+                                    </span>
+                                    <span
+                                        className={`font-light lowercase ml-12 -mt-2 ${headlineAccentFont}`}
+                                        style={{ color: headlineAccentColor }}
                                     >
                                         {headlineAccent}
                                     </span>
-                                    <span className="block">{headlineEnd}</span>
+                                    <span
+                                        className={`block ${headlineEndFont}`}
+                                        style={{ color: headlineEndColor }}
+                                    >
+                                        {headlineEnd}
+                                    </span>
                                 </h2>
                             );
                         }

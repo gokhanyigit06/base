@@ -583,70 +583,107 @@ export default function SettingsPage() {
                                             </div>
                                         )}
                                         {itemId === 'headline' && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Headline Part 1</label>
+                                            <div className="space-y-6">
+                                                {/* Headline Part 1 */}
+                                                <div className="bg-black border border-zinc-800 rounded-xl p-4">
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Headline Part 1</label>
                                                     <input
                                                         name="hero_headline_start"
                                                         value={settings.hero_headline_start}
                                                         onChange={handleChange}
-                                                        className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg"
+                                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg mb-3"
                                                     />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Headline Part 3</label>
-                                                    <input
-                                                        name="hero_headline_end"
-                                                        value={settings.hero_headline_end}
-                                                        onChange={handleChange}
-                                                        className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg"
-                                                    />
-                                                </div>
-                                                <div className="col-span-2 grid grid-cols-[1fr_100px] gap-4">
-                                                    <div>
-                                                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Accent Word</label>
-                                                        <input
-                                                            name="hero_headline_accent"
-                                                            value={settings.hero_headline_accent}
-                                                            onChange={handleChange}
-                                                            className="w-full bg-black border border-zinc-700 rounded-lg p-3 text-brand-yellow placeholder:text-gray-700 focus:border-brand-yellow outline-none font-serif italic text-lg"
-                                                            style={{ color: settings.hero_accent_color }}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Color</label>
-                                                        <div className="h-[50px] w-full relative rounded-lg overflow-hidden border border-zinc-700">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
+                                                            <select
+                                                                name="hero_headline_start_font"
+                                                                value={settings.hero_headline_start_font}
+                                                                onChange={handleChange}
+                                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                                            >
+                                                                {renderFontOptions()}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
                                                             <input
                                                                 type="color"
-                                                                name="hero_accent_color"
-                                                                value={settings.hero_accent_color}
+                                                                name="hero_headline_start_color"
+                                                                value={settings.hero_headline_start_color}
                                                                 onChange={handleChange}
-                                                                className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] cursor-pointer p-0 m-0 border-none"
+                                                                className="h-9 w-full bg-zinc-900 border border-zinc-700 rounded-lg cursor-pointer"
                                                             />
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-span-2 grid grid-cols-[1fr_100px] gap-4 pt-4 border-t border-zinc-800 mt-2">
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Headline Font Family</label>
-                                                        <select
-                                                            name="hero_headline_font"
-                                                            value={settings.hero_headline_font}
-                                                            onChange={handleChange}
-                                                            className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
-                                                        >
-                                                            {renderFontOptions()}
-                                                        </select>
+
+                                                {/* Accent Word */}
+                                                <div className="bg-black border border-zinc-800 rounded-xl p-4">
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Accent Word</label>
+                                                    <input
+                                                        name="hero_headline_accent"
+                                                        value={settings.hero_headline_accent}
+                                                        onChange={handleChange}
+                                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-serif italic text-lg mb-3"
+                                                        style={{ color: settings.hero_headline_accent_color }}
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
+                                                            <select
+                                                                name="hero_headline_accent_font"
+                                                                value={settings.hero_headline_accent_font}
+                                                                onChange={handleChange}
+                                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                                            >
+                                                                {renderFontOptions()}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                                            <input
+                                                                type="color"
+                                                                name="hero_headline_accent_color"
+                                                                value={settings.hero_headline_accent_color}
+                                                                onChange={handleChange}
+                                                                className="h-9 w-full bg-zinc-900 border border-zinc-700 rounded-lg cursor-pointer"
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Main Color</label>
-                                                        <input
-                                                            type="color"
-                                                            name="hero_headline_color"
-                                                            value={settings.hero_headline_color}
-                                                            onChange={handleChange}
-                                                            className="h-9 w-full bg-black border border-zinc-700 rounded-lg cursor-pointer"
-                                                        />
+                                                </div>
+
+                                                {/* Headline Part 3 */}
+                                                <div className="bg-black border border-zinc-800 rounded-xl p-4">
+                                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Headline Part 3</label>
+                                                    <input
+                                                        name="hero_headline_end"
+                                                        value={settings.hero_headline_end}
+                                                        onChange={handleChange}
+                                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder:text-gray-700 focus:border-brand-yellow outline-none font-oswald font-bold uppercase text-lg mb-3"
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Font</label>
+                                                            <select
+                                                                name="hero_headline_end_font"
+                                                                value={settings.hero_headline_end_font}
+                                                                onChange={handleChange}
+                                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-yellow"
+                                                            >
+                                                                {renderFontOptions()}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1">Color</label>
+                                                            <input
+                                                                type="color"
+                                                                name="hero_headline_end_color"
+                                                                value={settings.hero_headline_end_color}
+                                                                onChange={handleChange}
+                                                                className="h-9 w-full bg-zinc-900 border border-zinc-700 rounded-lg cursor-pointer"
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
