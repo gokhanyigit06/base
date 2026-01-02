@@ -49,7 +49,16 @@ export function WorksSection() {
 
                                 {/* Content */}
                                 <div className="w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out flex items-center justify-center relative">
-                                    {project.cover_image ? (
+                                    {project.cover_video ? (
+                                        <video
+                                            src={project.cover_video}
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : project.cover_image ? (
                                         <Image
                                             src={project.cover_image}
                                             alt={project.title}

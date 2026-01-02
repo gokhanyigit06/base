@@ -88,7 +88,7 @@ export function CustomCursor() {
     }, [cursorX, cursorY, isMobile]); // Added isMobile to dependency array
 
     // Early returns MOVED HERE (after all hooks)
-    if (pathname?.startsWith('/admin')) return null;
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/labs')) return null;
     if (isMobile) return null;
     if (!cursorUrl) return null;
 
