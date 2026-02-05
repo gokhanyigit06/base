@@ -109,10 +109,10 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
                 </div>
 
                 {/* Right Column: Video Preview & Trigger */}
-                <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+                <div className="w-full md:w-1/2 flex justify-center">
                     <div
                         onClick={() => setIsVideoOpen(true)}
-                        className="relative w-full aspect-[4/3] md:w-[80%] rounded-[2rem] overflow-hidden group cursor-pointer border border-white/10"
+                        className="relative w-full aspect-square md:w-[80%] rounded-[2rem] overflow-hidden group cursor-pointer border border-white/10"
                     >
                         {/* Auto-playing Preview Video */}
                         <div className="absolute inset-0 bg-zinc-900">
