@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -68,29 +69,15 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
                         }
                         if (item === 'headline') {
                             return (
-                                <h2
-                                    key={item}
-                                    className="text-[12vw] md:text-[7vw] leading-[0.85] font-bold uppercase flex flex-col"
-                                >
-                                    <span
-                                        className={`block ${headlineStartFont}`}
-                                        style={{ color: headlineStartColor }}
-                                    >
-                                        {headlineStart}
-                                    </span>
-                                    <span
-                                        className={`font-light lowercase ml-12 -mt-2 ${headlineAccentFont}`}
-                                        style={{ color: headlineAccentColor }}
-                                    >
-                                        {headlineAccent}
-                                    </span>
-                                    <span
-                                        className={`block ${headlineEndFont}`}
-                                        style={{ color: headlineEndColor }}
-                                    >
-                                        {headlineEnd}
-                                    </span>
-                                </h2>
+                                <div className="relative w-full aspect-video md:aspect-[3/2] scale-[2] translate-x-[15vw] z-10">
+                                    <Image
+                                        src="/Base_Acılıs_Ekran.png"
+                                        alt="IT STARTS AT THE BASE"
+                                        fill
+                                        className="object-contain object-left"
+                                        priority
+                                    />
+                                </div>
                             );
                         }
                         if (item === 'description') {
@@ -109,10 +96,10 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
                 </div>
 
                 {/* Right Column: Video Preview & Trigger */}
-                <div className="w-full md:w-1/2 flex justify-center">
+                <div className="w-full md:w-1/2 flex justify-center relative z-20">
                     <div
                         onClick={() => setIsVideoOpen(true)}
-                        className="relative w-full aspect-square md:w-[80%] rounded-[2rem] overflow-hidden group cursor-pointer border border-white/10"
+                        className="relative w-full aspect-square md:w-[80%] rounded-[2rem] overflow-hidden group cursor-pointer border border-white/10 z-20 shadow-2xl"
                     >
                         {/* Auto-playing Preview Video */}
                         <div className="absolute inset-0 bg-zinc-900">
@@ -125,8 +112,6 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
                                 src={videoUrl}
                             />
                         </div>
-
-
 
                         {/* Hover Hint */}
                         <div className="absolute bottom-8 left-8 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
