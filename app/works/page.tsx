@@ -61,7 +61,7 @@ export default function WorksPage() {
         <main className="min-h-screen bg-[#f2f2f2] text-black selection:bg-brand-yellow selection:text-black">
             <SiteHeader />
 
-            <div className="pt-32 pb-12 px-6 md:px-12 max-w-[1920px] mx-auto">
+            <div className="pt-32 pb-40 px-6 md:px-12 max-w-[1920px] mx-auto">
 
                 {/* HEADER & FILTERS */}
                 <div className="flex flex-col xl:flex-row items-start xl:items-end justify-between gap-8 mb-20">
@@ -97,36 +97,33 @@ export default function WorksPage() {
                         <Loader2 className="w-12 h-12 animate-spin text-gray-400" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
                         {projects.map((project, index) => (
                             <Link href={`/works/${project.slug}`} key={project.id} className="group block cursor-pointer">
                                 {/* Card Container */}
                                 <div
-                                    className="w-full aspect-[4/3] rounded-[2rem] overflow-hidden relative shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-white"
+                                    className="w-full aspect-video rounded-2xl overflow-hidden relative shadow-sm hover:shadow-md transition-all duration-500 bg-white"
                                     onMouseEnter={() => setHoveredIndex(index)}
                                     onMouseLeave={() => setHoveredIndex(null)}
                                 >
                                     {/* Media */}
                                     <motion.div
                                         className="w-full h-full"
-                                        whileHover={{ scale: 1.05 }}
-                                        transition={{ duration: 0.7, ease: [0.33, 1, 0.68, 1] }}
+                                        whileHover={{ scale: 1.03 }}
+                                        transition={{ duration: 0.5, ease: "easeOut" }}
                                     >
                                         {renderCardMedia(project)}
                                     </motion.div>
-
-                                    {/* Checkmark / Icon Overlay (Optional branding touch) */}
-                                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <ArrowUpRight className="w-5 h-5 text-black" />
-                                    </div>
                                 </div>
 
                                 {/* Title Label */}
-                                <div className="mt-6 text-center">
-                                    <h3 className="text-xl font-bold font-oswald uppercase tracking-wide group-hover:text-brand-purple transition-colors">
+                                <div className="mt-4 text-left">
+                                    <h3 className="text-2xl font-medium tracking-tight text-black group-hover:text-black/80 transition-colors">
                                         {project.title}
                                     </h3>
-                                    <span className="text-xs font-mono text-gray-500 uppercase tracking-widest mt-1 block">{project.category}</span>
+                                    <span className="text-base text-gray-600 mt-1 block leading-snug">
+                                        {project.category || "Development"}
+                                    </span>
                                 </div>
                             </Link>
                         ))}

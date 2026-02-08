@@ -69,9 +69,9 @@ export function FeatureSection({ initialSettings = {} }: FeatureSectionProps) {
                         }
                         if (item === 'headline') {
                             return (
-                                <div className="relative w-full aspect-video md:aspect-[3/2] scale-[2] translate-x-[15vw] z-10">
+                                <div key={item} className="relative w-full aspect-video md:aspect-[3/2] scale-[1.2] translate-x-[5vw] -translate-y-12 z-10">
                                     <Image
-                                        src="/Base_Acılıs_Ekran.png"
+                                        src="/Base_Acılıs_Ekran3.png"
                                         alt="IT STARTS AT THE BASE"
                                         fill
                                         className="object-contain object-left"

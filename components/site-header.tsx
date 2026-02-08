@@ -24,8 +24,8 @@ export function SiteHeader({ theme = "dark" }: { theme?: "light" | "dark" }) {
     return (
         <motion.header
             className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 transition-all duration-300 ease-in-out ${isScrolled
-                    ? `h-20 ${theme === 'light' ? 'bg-white/80' : 'bg-black/80'} backdrop-blur-md scale-[0.98] origin-top`
-                    : 'h-24 bg-transparent scale-100'
+                ? `h-20 ${theme === 'light' ? 'bg-white/80' : 'bg-black/80'} backdrop-blur-md`
+                : 'h-24 bg-transparent'
                 }`}
             initial={{ y: -100 }}
             animate={{ y: 0 }}
