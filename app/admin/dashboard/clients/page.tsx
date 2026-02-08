@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { Plus, Trash2, Edit, Save, Loader2, Image as ImageIcon, X } from "lucide-react";
 import Image from "next/image";
 
@@ -27,17 +26,19 @@ export default function ClientsPage() {
 
     const fetchClients = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('clients')
-            .select('*')
-            .order('display_order', { ascending: true });
-
-        if (error) {
-            console.error('Error fetching clients:', error);
-        } else {
-            setClients(data || []);
+        try {
+            const res = await fetch('/api/clients');
+            if (res.ok) {
+                const data = await res.json();
+                setClients(data);
+            } else {
+                console.error("Failed to fetch clients");
+            }
+        } catch (error) {
+            console.error("Error fetching clients:", error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSave = async () => {
@@ -48,30 +49,22 @@ export default function ClientsPage() {
 
         setSaving(true);
         try {
-            const clientData = {
+            const method = currentClient.id ? 'PUT' : 'POST';
+            const body = {
+                id: currentClient.id,
                 name: currentClient.name,
                 description: currentClient.description || "",
                 logo_url: currentClient.logo_url || "",
                 display_order: currentClient.display_order || 0
             };
 
-            let error;
-            if (currentClient.id) {
-                // Update
-                const { error: updateError } = await supabase
-                    .from('clients')
-                    .update(clientData)
-                    .eq('id', currentClient.id);
-                error = updateError;
-            } else {
-                // Insert
-                const { error: insertError } = await supabase
-                    .from('clients')
-                    .insert([clientData]);
-                error = insertError;
-            }
+            const res = await fetch('/api/clients', {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Failed to save client');
 
             setIsEditing(false);
             setCurrentClient({});
@@ -88,12 +81,12 @@ export default function ClientsPage() {
         if (!confirm("Are you sure you want to delete this client?")) return;
 
         try {
-            const { error } = await supabase
-                .from('clients')
-                .delete()
-                .eq('id', id);
+            const res = await fetch(`/api/clients?id=${id}`, {
+                method: 'DELETE'
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Failed to delete client');
+
             fetchClients();
         } catch (error: any) {
             console.error('Error deleting client:', error);
@@ -107,45 +100,22 @@ export default function ClientsPage() {
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `client-${Date.now()}.${fileExt}`;
-            const filePath = `clients/${fileName}`;
+            const formData = new FormData();
+            formData.append('file', file);
 
-            const { error: uploadError } = await supabase.storage
-                .from('client-logos')
-                .upload(filePath, file);
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
 
-            if (uploadError) {
-                // If bucket doesn't exist, try creating it first (or fallback to generic assets if policy allows)
-                // But generally we expect the setup SQL to have run.
-                // Let's try project-assets if client-logos fails, as a fallback? 
-                // No, stick to one. But to be safe, I'll recommend the user to run the SQL.
-                throw uploadError;
-            }
+            if (!res.ok) throw new Error('Upload failed');
 
-            const { data } = supabase.storage.from('client-logos').getPublicUrl(filePath);
-            setCurrentClient(prev => ({ ...prev, logo_url: data.publicUrl }));
+            const { url } = await res.json();
+            setCurrentClient(prev => ({ ...prev, logo_url: url }));
 
         } catch (error: any) {
             console.error('Error uploading logo:', error);
-            // Fallback attempt to project-assets just in case
-            try {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `client-${Date.now()}.${fileExt}`;
-                const filePath = `clients/${fileName}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('project-assets')
-                    .upload(filePath, file);
-
-                if (!uploadError) {
-                    const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-                    setCurrentClient(prev => ({ ...prev, logo_url: data.publicUrl }));
-                    setUploading(false);
-                    return;
-                }
-            } catch (fallbackError) { }
-
-            alert(`Error uploading logo: ${error.message}. Please ensure the 'client-logos' bucket exists.`);
+            alert(`Error uploading logo: ${error.message}`);
         } finally {
             setUploading(false);
         }

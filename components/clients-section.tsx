@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
 import Image from "next/image";
 
 export function ClientsSection() {
@@ -10,12 +10,15 @@ export function ClientsSection() {
 
     useEffect(() => {
         const fetchClients = async () => {
-            const { data } = await supabase
-                .from('clients')
-                .select('*')
-                .order('display_order', { ascending: true });
-
-            if (data) setClients(data);
+            try {
+                const res = await fetch('/api/clients');
+                if (res.ok) {
+                    const data = await res.json();
+                    setClients(data);
+                }
+            } catch (error) {
+                console.error('Failed to load clients', error);
+            }
         };
         fetchClients();
     }, []);

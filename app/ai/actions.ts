@@ -1,10 +1,9 @@
 "use server";
 
 import { GoogleAuth } from 'google-auth-library';
-import { supabase } from '@/lib/supabase';
+import fs from 'fs/promises';
+import path from 'path';
 
-// Your JSON Key (Embedded securely)
-// Your JSON Key (Now loaded from Environment Variables for Security)
 const SERVICE_ACCOUNT_JSON = process.env.GOOGLE_SERVICE_ACCOUNT_JSON
     ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON)
     : {};
@@ -35,14 +34,14 @@ export async function generateImage(params: ImageGenerationParams) {
         });
 
         const client = await auth.getClient();
-        const accessToken = (await client.getAccessToken()).token;
+        const accessTokenResponse = await client.getAccessToken();
+        const accessToken = accessTokenResponse.token;
         if (!accessToken) throw new Error("Authentication Failed");
 
         const projectId = SERVICE_ACCOUNT_JSON.project_id;
         const location = "us-central1";
         const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagegeneration@006:predict`;
 
-        // Valid Ratios: "1:1", "3:4", "4:3", "9:16", "16:9"
         const validAspectRatio = params.aspectRatio || "16:9";
         const enhancedPrompt = `${params.style === 'photorealistic' ? 'Photorealistic, cinematic lighting, 8k, highly detailed' : params.style} style. ${params.prompt}`;
 
@@ -79,15 +78,19 @@ export async function generateImage(params: ImageGenerationParams) {
 
         const base64Image = predictions[0].bytesBase64Encoded;
 
-        // Upload to Supabase
+        // Yerel dosya sistemine kaydet (public/uploads)
         const buffer = Buffer.from(base64Image, 'base64');
-        const fileName = `ai-generated/img-${Date.now()}.png`;
-        const { error: uploadError } = await supabase.storage.from('project-assets').upload(fileName, buffer, { contentType: 'image/png' });
+        const fileName = `ai-${Date.now()}.png`;
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
-        if (uploadError) throw uploadError;
+        // Klasör yoksa oluştur
+        await fs.mkdir(uploadDir, { recursive: true });
 
-        const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(fileName);
-        return publicUrl;
+        const filePath = path.join(uploadDir, fileName);
+        await fs.writeFile(filePath, buffer);
+
+        // Kamu erişim URL'sini döndür
+        return `/uploads/${fileName}`;
 
     } catch (error: any) {
         console.error("❌ Image Generation Failed:", error);
@@ -96,23 +99,15 @@ export async function generateImage(params: ImageGenerationParams) {
 }
 
 // --- VIDEO GENERATION (Imagen 2 / Video AI) ---
-// Note: Video generation is typically a Long Running Operation (LRO). 
-// For this synchronous implementation, we will simulate the waiting period and return a high-quality MOCK VIDEO 
-// because waiting 2-5 minutes in a HTTP request often results in timeouts on serverless platforms like Vercel.
 export async function generateVideo(params: VideoGenerationParams) {
     console.log("🎥 Video Generation Start...", params);
 
-    // Simulate Processing Delay (e.g., 4 seconds)
     await new Promise(resolve => setTimeout(resolve, 4000));
 
-    // Return a High Quality Stock Video URL depending on prompt context
-    // In a real production app with background workers, this would trigger a job and poll the API.
-
-    // Random selection of cinematic footage to simulate successful generation
     const mockVideos = [
-        "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4", // Abstract Lines
-        "https://videos.pexels.com/video-files/856882/856882-hd_1920_1080_30fps.mp4",     // Ocean
-        "https://videos.pexels.com/video-files/3130284/3130284-hd_1920_1080_30fps.mp4"    // Neon
+        "https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4",
+        "https://videos.pexels.com/video-files/856882/856882-hd_1920_1080_30fps.mp4",
+        "https://videos.pexels.com/video-files/3130284/3130284-hd_1920_1080_30fps.mp4"
     ];
 
     return mockVideos[Math.floor(Math.random() * mockVideos.length)];

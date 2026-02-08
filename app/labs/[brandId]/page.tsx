@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import {
     ArrowLeft, Calendar as CalendarIcon, Image as ImageIcon,
     MoreHorizontal, Clock, CheckCircle, Smartphone, Layout,
@@ -443,18 +442,32 @@ export default function VisualPlannerPage() {
     }, [brandId]);
 
     const fetchBrand = async () => {
-        const { data } = await supabase.from('brands').select('*').eq('id', brandId).single();
-        if (data) setBrand(data);
+        try {
+            const res = await fetch(`/api/brands?id=${brandId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setBrand(data);
+            }
+        } catch (e) {
+            console.error("Error fetching brand:", e);
+        }
     };
 
     const fetchPosts = async () => {
-        const { data } = await supabase.from('scheduled_posts').select('*').eq('brand_id', brandId);
-        if (data) setPosts(data);
+        try {
+            const res = await fetch(`/api/scheduled-posts?brandId=${brandId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setPosts(data || []);
+            }
+        } catch (e) {
+            console.error("Error fetching posts:", e);
+        }
     };
 
     // --- ACTIONS ---
 
-    // 1. Handle File Upload
+    // 1. Handle File Upload (Using local /api/upload)
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
         setIsUploading(true);
@@ -464,37 +477,36 @@ export default function VisualPlannerPage() {
 
         for (const file of files) {
             try {
-                // Upload to Supabase Storage
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-                const filePath = `${brandId}/${fileName}`;
+                // Upload to LOCAL endpoint
+                const formData = new FormData();
+                formData.append('file', file);
 
-                const { error: uploadError } = await supabase.storage
-                    .from('labs_media')
-                    .upload(filePath, file);
+                const uploadRes = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                if (uploadError) throw uploadError;
+                if (!uploadRes.ok) throw new Error('Upload failed');
+                const uploadData = await uploadRes.json();
+                const publicUrl = uploadData.url;
 
-                const { data: { publicUrl } } = supabase.storage
-                    .from('labs_media')
-                    .getPublicUrl(filePath);
-
-                // Create Draft in DB (Using selected uploadType)
-                const { data: postData, error: dbError } = await supabase
-                    .from('scheduled_posts')
-                    .insert([{
+                // Create Draft in DB
+                const dbRes = await fetch('/api/scheduled-posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
                         brand_id: brandId,
-                        type: uploadType, // Uses the selected type from UI
+                        type: uploadType,
                         content_text: '',
                         media_url: publicUrl,
                         status: 'draft',
                         scheduled_at: new Date().toISOString()
-                    }])
-                    .select()
-                    .single();
+                    })
+                });
 
-                if (dbError) throw dbError;
-                if (postData) newPosts.push(postData);
+                if (!dbRes.ok) throw new Error('Failed to create post record');
+                const postData = await dbRes.json();
+                newPosts.push(postData);
 
             } catch (error: any) {
                 console.error("Upload failed for file:", file.name, error);
@@ -514,11 +526,15 @@ export default function VisualPlannerPage() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this post?")) return;
 
-        const { error } = await supabase.from('scheduled_posts').delete().eq('id', id);
-        if (!error) {
-            setPosts(prev => prev.filter(p => p.id !== id));
-            setEditingPost(null);
-        } else {
+        try {
+            const res = await fetch(`/api/scheduled-posts?id=${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setPosts(prev => prev.filter(p => p.id !== id));
+                setEditingPost(null);
+            } else {
+                alert("Delete failed");
+            }
+        } catch (e) {
             alert("Delete failed");
         }
     };
@@ -530,12 +546,9 @@ export default function VisualPlannerPage() {
 
         try {
             const draftIds = drafts.map(d => d.id);
-            const { error } = await supabase
-                .from('scheduled_posts')
-                .delete()
-                .in('id', draftIds);
+            const res = await fetch(`/api/scheduled-posts?ids=${draftIds.join(',')}`, { method: 'DELETE' });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Clear failed');
             setPosts(prev => prev.filter(p => !draftIds.includes(p.id)));
         } catch (error) {
             console.error("Failed to clear drafts", error);
@@ -545,13 +558,18 @@ export default function VisualPlannerPage() {
 
     // 3. Update Post (Caption/Type)
     const handleUpdate = async (id: string, updates: Partial<Post>) => {
-        const { error } = await supabase
-            .from('scheduled_posts')
-            .update(updates)
-            .eq('id', id);
+        try {
+            const res = await fetch('/api/scheduled-posts', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...updates })
+            });
 
-        if (!error) {
-            setPosts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+            if (res.ok) {
+                setPosts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+            }
+        } catch (e) {
+            console.error("Update failed", e);
         }
     };
 
@@ -560,13 +578,17 @@ export default function VisualPlannerPage() {
         if (!confirm(`Delete ${selectedPostIds.size} selected items?`)) return;
 
         const ids = Array.from(selectedPostIds);
-        const { error } = await supabase.from('scheduled_posts').delete().in('id', ids);
+        try {
+            const res = await fetch(`/api/scheduled-posts?ids=${ids.join(',')}`, { method: 'DELETE' });
 
-        if (!error) {
-            setPosts(prev => prev.filter(p => !selectedPostIds.has(p.id)));
-            setSelectedPostIds(new Set());
-            setIsSelectionMode(false);
-        } else {
+            if (res.ok) {
+                setPosts(prev => prev.filter(p => !selectedPostIds.has(p.id)));
+                setSelectedPostIds(new Set());
+                setIsSelectionMode(false);
+            } else {
+                alert("Bulk delete failed");
+            }
+        } catch (e) {
             alert("Bulk delete failed");
         }
     };
@@ -578,7 +600,7 @@ export default function VisualPlannerPage() {
         setSelectedPostIds(newSet);
     };
 
-    // 5. Handle Manual Publish (REAL API)
+    // 5. Handle Manual Publish
     const handlePublish = async (id: string) => {
         const post = posts.find(p => p.id === id);
         if (!post || !post.media_url) {
@@ -587,14 +609,13 @@ export default function VisualPlannerPage() {
         }
 
         try {
-            // 1. Call our Next.js API Proxy asking for Specific Brand Credentials
             const response = await fetch('/api/instagram/publish', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     imageUrl: post.media_url,
                     caption: post.content_text || '',
-                    brandId: brandId // Pass the brand ID to fetch correct tokens
+                    brandId: brandId
                 })
             });
 
@@ -605,17 +626,18 @@ export default function VisualPlannerPage() {
                 return;
             }
 
-            // 2. If successful, update DB status
-            const { error } = await supabase
-                .from('scheduled_posts')
-                .update({ status: 'published' }) // Store real IG ID if needed later: instagram_id: data.id 
-                .eq('id', id);
+            // If successful, update DB status
+            const dbRes = await fetch('/api/scheduled-posts', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: 'published' })
+            });
 
-            if (!error) {
+            if (dbRes.ok) {
                 setPosts(prev => prev.map(p => p.id === id ? { ...p, status: 'published' } : p));
                 alert("Published Successfully! 🚀");
             } else {
-                alert("Published on IG but failed to update DB status");
+                alert("Published on IG but failed to update local DB status");
             }
 
         } catch (e) {
@@ -642,10 +664,11 @@ export default function VisualPlannerPage() {
             );
             setPosts(updatedPosts);
 
-            await supabase
-                .from('scheduled_posts')
-                .update({ status: 'draft' }) // Keep scheduled_at as is or set new date? Usually keep history or reset. Let's keep it but status rules.
-                .eq('id', postId);
+            await fetch('/api/scheduled-posts', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: postId, status: 'draft' })
+            });
             return;
         }
 
@@ -663,10 +686,11 @@ export default function VisualPlannerPage() {
         setPosts(updatedPosts);
 
         // DB Update
-        await supabase
-            .from('scheduled_posts')
-            .update({ status: 'scheduled', scheduled_at: newScheduledAt })
-            .eq('id', postId);
+        await fetch('/api/scheduled-posts', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: postId, status: 'scheduled', scheduled_at: newScheduledAt })
+        });
     };
 
     const handleDragStart = (event: DragStartEvent) => {

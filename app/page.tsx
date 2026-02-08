@@ -5,32 +5,27 @@ import { WorksSection } from "@/components/works-section";
 import { ClientsSection } from "@/components/clients-section";
 import { SloganSection } from "@/components/slogan-section";
 import { SiteFooter } from "@/components/site-footer";
-import { supabase } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 async function getSettings() {
-  // Add a timestamp to bypass any edge caching if absolutely needed, but force-dynamic should work.
   console.log("Fetching settings on server...");
-  const { data, error } = await supabase.from('site_settings').select('key, value');
+  try {
+    const { rows } = await query('SELECT key, value FROM site_settings');
 
-  if (error) {
-    console.error("Supabase SSR fetch error:", error);
-  }
+    const settings: Record<string, string> = {};
+    rows.forEach((item: any) => {
+      settings[item.key] = item.value;
+    });
 
-  if (!data) {
-    console.log("No data returned from settings fetch.");
+    console.log("Fetched Settings on Server:", JSON.stringify(settings, null, 2));
+    return settings;
+  } catch (error) {
+    console.error("DB fetch error:", error);
     return {};
   }
-
-  const settings: Record<string, string> = {};
-  data.forEach(item => {
-    settings[item.key] = item.value;
-  });
-
-  console.log("Fetched Settings on Server:", JSON.stringify(settings, null, 2));
-  return settings;
 }
 
 export default async function Home() {

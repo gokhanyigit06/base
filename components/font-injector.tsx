@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+
 
 interface CustomFont {
     id: string;
@@ -15,12 +15,14 @@ export function FontInjector() {
 
     useEffect(() => {
         const fetchFonts = async () => {
-            const { data } = await supabase
-                .from('custom_fonts')
-                .select('*');
-
-            if (data) {
-                setCustomFonts(data);
+            try {
+                const res = await fetch('/api/custom-fonts');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCustomFonts(data);
+                }
+            } catch (error) {
+                console.error("Error fetching fonts:", error);
             }
         };
         fetchFonts();

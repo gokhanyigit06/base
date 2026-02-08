@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Save, Loader2, Trash2, GripVertical } from "lucide-react";
 import Image from "next/image";
@@ -51,20 +50,15 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
     useEffect(() => {
         const fetchProject = async () => {
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .eq('id', id)
-                .single();
+            try {
+                const res = await fetch(`/api/projects?id=${id}`);
+                if (!res.ok) throw new Error('Failed to fetch project');
 
-            if (error) {
-                console.error(error);
-                alert("Error fetching project");
-                router.push('/admin/dashboard');
-                return;
-            }
+                const dataArray = await res.json();
+                const data = dataArray[0];
 
-            if (data) {
+                if (!data) throw new Error('Project not found');
+
                 setFormData({
                     title: data.title || "",
                     slug: data.slug || "",
@@ -83,8 +77,13 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                     id: b.id || crypto.randomUUID()
                 }));
                 setContentBlocks(contentWithIds);
+                setLoading(false);
+
+            } catch (error) {
+                console.error(error);
+                alert("Error fetching project");
+                router.push('/admin/dashboard');
             }
-            setLoading(false);
         };
 
         fetchProject();
@@ -120,16 +119,19 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
         setUploadStatus("Uploading...");
 
-        const fileExt = originalFile.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${fileName}`;
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', fileToUpload);
 
         try {
-            const { error: uploadError } = await supabase.storage.from('project-assets').upload(filePath, fileToUpload);
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: uploadFormData
+            });
 
-            if (uploadError) throw uploadError;
+            if (!res.ok) throw new Error('Upload failed');
 
-            const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+            const { url } = await res.json();
+            const publicUrl = url;
 
             if (isCover) {
                 setFormData({ ...formData, cover_image: publicUrl });
@@ -198,16 +200,18 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         const finalSlug = formData.slug || formData.title.toLowerCase().replace(/ /g, '-');
 
         try {
-            const { error } = await supabase
-                .from('projects')
-                .update({
+            const res = await fetch('/api/projects', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id,
                     ...formData,
                     slug: finalSlug,
                     content: contentBlocks
                 })
-                .eq('id', id);
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Update failed');
 
             alert("Project Updated Successfully!");
             router.push('/admin/dashboard');

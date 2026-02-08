@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Save, Loader2, Trash2, GripVertical } from "lucide-react";
 import Image from "next/image";
@@ -50,8 +49,6 @@ export default function NewProjectPage() {
 
     // Handle Image Upload
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isCover: boolean = false, blockIndex: number = -1, itemIndex: number = -1) => {
-        // ... (existing logic)
-
         if (!e.target.files || e.target.files.length === 0) return;
 
         const originalFile = e.target.files[0];
@@ -84,17 +81,19 @@ export default function NewProjectPage() {
 
         setUploadStatus("Uploading...");
 
-        const fileExt = originalFile.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${fileName}`;
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', fileToUpload);
 
         try {
-            const { error: uploadError } = await supabase.storage.from('project-assets').upload(filePath, fileToUpload);
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: uploadFormData
+            });
 
-            if (uploadError) throw uploadError;
+            if (!res.ok) throw new Error('Upload failed');
 
-            // Get Public URL
-            const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(filePath);
+            const { url } = await res.json();
+            const publicUrl = url; // '/uploads/filename...'
 
             if (isCover) {
                 setFormData({ ...formData, cover_image: publicUrl });
@@ -120,7 +119,6 @@ export default function NewProjectPage() {
         }
     };
 
-    // Add Content Block
     // Add Content Block
     const addBlock = (type: 'full' | 'row' | 'slider') => {
         const id = crypto.randomUUID();
@@ -148,17 +146,17 @@ export default function NewProjectPage() {
         const finalSlug = formData.slug || formData.title.toLowerCase().replace(/ /g, '-');
 
         try {
-            const { error } = await supabase
-                .from('projects')
-                .insert([
-                    {
-                        ...formData,
-                        slug: finalSlug,
-                        content: contentBlocks
-                    }
-                ]);
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData,
+                    slug: finalSlug,
+                    content: contentBlocks
+                })
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Create failed');
 
             alert("Project Created Successfully!");
             router.push('/admin/dashboard');
@@ -190,6 +188,9 @@ export default function NewProjectPage() {
             });
         }
     };
+
+    // Helper to check if global uploading spinner should show on a specific block
+    function isCoverForBlock(index: number) { return false; }
 
     return (
         <div className="max-w-5xl mx-auto pb-24">
@@ -479,7 +480,4 @@ export default function NewProjectPage() {
             </form>
         </div>
     );
-
-    // Helper to check if global uploading spinner should show on a specific block (simplified for now to global)
-    function isCoverForBlock(index: number) { return false; }
 }

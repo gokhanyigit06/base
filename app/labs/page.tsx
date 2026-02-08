@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { Plus, ArrowRight, LayoutGrid } from "lucide-react";
+import { Plus, ArrowRight, LayoutGrid, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Brand {
@@ -24,15 +23,13 @@ export default function LabsPage() {
 
     const fetchBrands = async () => {
         try {
-            const { data, error } = await supabase
-                .from('brands')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setBrands(data || []);
+            const res = await fetch('/api/brands');
+            if (res.ok) {
+                const data = await res.json();
+                setBrands(data || []);
+            }
         } catch (error: any) {
-            console.error("Error fetching brands:", error.message || error);
+            console.error("Error fetching brands:", error);
         } finally {
             setIsLoading(false);
         }
@@ -43,20 +40,20 @@ export default function LabsPage() {
         if (!newBrandName.trim()) return;
 
         try {
-            const { data, error } = await supabase
-                .from('brands')
-                .insert([{ name: newBrandName }])
-                .select()
-                .single();
+            const res = await fetch('/api/brands', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newBrandName })
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Failed to create brand');
+            const data = await res.json();
 
             setBrands([data, ...brands]);
             setNewBrandName("");
             setIsCreating(false);
         } catch (error: any) {
             console.error("Error creating brand:", error);
-            // Show the actual error message from Supabase
             alert(`Failed to create brand: ${error.message || "Unknown error"}`);
         }
     };
@@ -125,7 +122,10 @@ export default function LabsPage() {
 
             <div className="max-w-7xl mx-auto">
                 {isLoading ? (
-                    <div className="text-zinc-500 font-mono text-sm animate-pulse">Loading protocols...</div>
+                    <div className="text-zinc-500 font-mono text-sm animate-pulse flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading protocols...
+                    </div>
                 ) : brands.length === 0 ? (
                     <div className="text-center py-20 border border-dashed border-zinc-800 rounded-3xl">
                         <LayoutGrid className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
@@ -144,7 +144,7 @@ export default function LabsPage() {
                                 </div>
 
                                 <div className="w-12 h-12 bg-zinc-800 rounded-full mb-6 flex items-center justify-center text-xl font-bold capitalize">
-                                    {brand.name.substring(0, 2)}
+                                    {(brand.name || "UN").substring(0, 2)}
                                 </div>
 
                                 <h3 className="text-xl font-bold mb-2 group-hover:tracking-wide transition-all">{brand.name}</h3>

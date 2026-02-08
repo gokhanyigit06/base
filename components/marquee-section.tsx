@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, useVelocity, useSpring } from "framer-motion";
-import { supabase } from "@/lib/supabase";
 
 export function MarqueeSection() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -14,32 +13,31 @@ export function MarqueeSection() {
         offset: ["start end", "end start"],
     });
 
-    // 1. Slower horizontal movement (Dynamic based on settings)
     const x = useTransform(scrollYProgress, [0, 1], ["0%", `-${speed}%`]);
 
-    // 2. Velocity-based Skew (Italic Effect)
     const scrollVelocity = useVelocity(scrollY);
     const smoothVelocity = useSpring(scrollVelocity, {
         damping: 50,
         stiffness: 400
     });
 
-    // Map velocity to skew degrees. 
-    // Moving down (positive velocity) -> Skew negative (forward slant)
     const skewX = useTransform(smoothVelocity, [-2000, 0, 2000], [15, 0, -15]);
 
     useEffect(() => {
         const fetchSettings = async () => {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('key, value')
-                .in('key', ['marquee_text', 'marquee_speed']);
-
-            if (data) {
-                data.forEach(item => {
-                    if (item.key === 'marquee_text') setMarqueeText(item.value);
-                    if (item.key === 'marquee_speed') setSpeed(Number(item.value));
-                });
+            try {
+                const res = await fetch('/api/settings');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        data.forEach((item: any) => {
+                            if (item.key === 'marquee_text') setMarqueeText(item.value);
+                            if (item.key === 'marquee_speed') setSpeed(Number(item.value));
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Marquee settings fetch failed", e);
             }
         };
         fetchSettings();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
 import { Plus, Star, StarOff, Loader2, GripVertical } from "lucide-react";
 import Link from "next/link";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -63,14 +63,11 @@ export default function DashboardPage() {
 
     const fetchProjects = async () => {
         try {
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .order('display_order', { ascending: true });
-
-            if (error) throw error;
-            if (data) setProjects(data);
-
+            const res = await fetch('/api/projects');
+            if (res.ok) {
+                const data = await res.json();
+                setProjects(data);
+            }
         } catch (error) {
             console.error("Error fetching projects:", error);
         } finally {
@@ -84,12 +81,13 @@ export default function DashboardPage() {
 
     const toggleFeatured = async (id: string, currentStatus: boolean) => {
         try {
-            const { error } = await supabase
-                .from('projects')
-                .update({ is_featured: !currentStatus })
-                .eq('id', id);
+            const res = await fetch('/api/projects', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, is_featured: !currentStatus })
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Update failed');
 
             // Optimistic Update
             setProjects(projects.map(p => p.id === id ? { ...p, is_featured: !currentStatus } : p));
@@ -118,12 +116,14 @@ export default function DashboardPage() {
                     display_order: index + 1
                 }));
 
-                for (const update of updates) {
-                    await supabase
-                        .from('projects')
-                        .update({ display_order: update.display_order })
-                        .eq('id', update.id);
-                }
+                // Parallel requests for faster updates
+                await Promise.all(updates.map(update =>
+                    fetch('/api/projects', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: update.id, display_order: update.display_order })
+                    })
+                ));
 
             } catch (error) {
                 console.error("Error saving order:", error);

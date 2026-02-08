@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { Save, Loader2, Type, GripVertical, MousePointer2, ImagePlus, Upload } from "lucide-react";
+import { Save, Loader2, Type, GripVertical, MousePointer2, ImagePlus, Upload, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -73,22 +72,22 @@ export default function SettingsPage() {
         cursor_size: "32",
         cursor_hover_size: "32",
 
-        // Colors (Hex defaults matching brand colors)
-        hero_accent_color: "#CCF000", // brand-yellow
+        // Colors
+        hero_accent_color: "#CCF000",
         hero_tagline_color: "#9CA3AF",
-        hero_headline_color: "#FFFFFF", // Legacy/fallback
-        hero_headline_start_color: "#FFFFFF", // NEW: Headline Part 1
-        hero_headline_accent_color: "#CCF000", // NEW: Accent Word (yellow by default)
-        hero_headline_end_color: "#FFFFFF", // NEW: Headline Part 3
+        hero_headline_color: "#FFFFFF",
+        hero_headline_start_color: "#FFFFFF",
+        hero_headline_accent_color: "#CCF000",
+        hero_headline_end_color: "#FFFFFF",
         hero_description_color: "#9CA3AF",
 
         // Fonts
         custom_font_url: "",
         hero_tagline_font: "font-mono",
-        hero_headline_font: "font-oswald", // Legacy/fallback
-        hero_headline_start_font: "font-oswald", // NEW: Headline Part 1
-        hero_headline_accent_font: "font-oswald", // NEW: Accent Word
-        hero_headline_end_font: "font-oswald", // NEW: Headline Part 3
+        hero_headline_font: "font-oswald",
+        hero_headline_start_font: "font-oswald",
+        hero_headline_accent_font: "font-oswald",
+        hero_headline_end_font: "font-oswald",
         hero_description_font: "font-mono",
 
         // Slogan Section
@@ -137,103 +136,46 @@ export default function SettingsPage() {
     // Fetch initial settings
     useEffect(() => {
         const fetchSettings = async () => {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('key, value');
+            try {
+                const res = await fetch('/api/settings');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Array.isArray(data)) {
+                        const newSettings = { ...settings };
+                        let hasChanges = false;
 
-            if (data) {
-                const settingsMap = {
-                    homepage_video_url: (val: string) => setSettings(prev => ({ ...prev, homepage_video_url: val })),
-                    hero_tagline: (val: string) => setSettings(prev => ({ ...prev, hero_tagline: val })),
-                    hero_headline_start: (val: string) => setSettings(prev => ({ ...prev, hero_headline_start: val })),
-                    hero_headline_accent: (val: string) => setSettings(prev => ({ ...prev, hero_headline_accent: val })),
-                    hero_headline_end: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end: val })),
-                    hero_description: (val: string) => setSettings(prev => ({ ...prev, hero_description: val })),
-                    hero_accent_color: (val: string) => setSettings(prev => ({ ...prev, hero_accent_color: val })),
-                    hero_tagline_color: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_color: val })),
-                    hero_headline_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_color: val })),
-                    hero_headline_start_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_start_color: val })),
-                    hero_headline_accent_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_accent_color: val })),
-                    hero_headline_end_color: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end_color: val })),
-                    hero_description_color: (val: string) => setSettings(prev => ({ ...prev, hero_description_color: val })),
-                    hero_tagline_font: (val: string) => setSettings(prev => ({ ...prev, hero_tagline_font: val })),
-                    hero_headline_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_font: val })),
-                    hero_headline_start_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_start_font: val })),
-                    hero_headline_accent_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_accent_font: val })),
-                    hero_headline_end_font: (val: string) => setSettings(prev => ({ ...prev, hero_headline_end_font: val })),
-                    hero_description_font: (val: string) => setSettings(prev => ({ ...prev, hero_description_font: val })),
-                    custom_font_url: (val: string) => setSettings(prev => ({ ...prev, custom_font_url: val })),
+                        data.forEach((item: any) => {
+                            if (Reflect.has(newSettings, item.key)) {
+                                // @ts-ignore
+                                newSettings[item.key] = item.value;
+                                hasChanges = true;
+                            }
+                            if (item.key === 'hero_elements_order') {
+                                try {
+                                    setHeroOrder(JSON.parse(item.value));
+                                } catch (e) { }
+                            }
+                        });
 
-                    slogan_l1_start: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_start: val })),
-                    slogan_l1_accent: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_accent: val })),
-                    slogan_l2_accent: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_accent: val })),
-                    slogan_l2_middle: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_middle: val })),
-                    slogan_l2_end: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_end: val })),
-
-                    slogan_l1_start_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_start_font: val })),
-                    slogan_l1_start_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_start_color: val })),
-                    slogan_l1_accent_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_accent_font: val })),
-                    slogan_l1_accent_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l1_accent_color: val })),
-                    slogan_l2_accent_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_accent_font: val })),
-                    slogan_l2_accent_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_accent_color: val })),
-                    slogan_l2_middle_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_middle_font: val })),
-                    slogan_l2_middle_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_middle_color: val })),
-                    slogan_l2_end_font: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_end_font: val })),
-                    slogan_l2_end_color: (val: string) => setSettings(prev => ({ ...prev, slogan_l2_end_color: val })),
-
-                    cta_text_1: (val: string) => setSettings(prev => ({ ...prev, cta_text_1: val })),
-                    cta_text_1_font: (val: string) => setSettings(prev => ({ ...prev, cta_text_1_font: val })),
-                    cta_text_1_color: (val: string) => setSettings(prev => ({ ...prev, cta_text_1_color: val })),
-                    cta_text_2: (val: string) => setSettings(prev => ({ ...prev, cta_text_2: val })),
-                    cta_text_2_font: (val: string) => setSettings(prev => ({ ...prev, cta_text_2_font: val })),
-                    cta_text_2_color: (val: string) => setSettings(prev => ({ ...prev, cta_text_2_color: val })),
-                    cta_btn_text: (val: string) => setSettings(prev => ({ ...prev, cta_btn_text: val })),
-                    cta_btn_font: (val: string) => setSettings(prev => ({ ...prev, cta_btn_font: val })),
-                    cta_btn_text_color: (val: string) => setSettings(prev => ({ ...prev, cta_btn_text_color: val })),
-                    cta_btn_bg_color: (val: string) => setSettings(prev => ({ ...prev, cta_btn_bg_color: val })),
-                    cta_btn_border_color: (val: string) => setSettings(prev => ({ ...prev, cta_btn_border_color: val })),
-
-                    footer_email: (val: string) => setSettings(prev => ({ ...prev, footer_email: val })),
-                    footer_phone: (val: string) => setSettings(prev => ({ ...prev, footer_phone: val })),
-                    footer_address: (val: string) => setSettings(prev => ({ ...prev, footer_address: val })),
-                    footer_copyright: (val: string) => setSettings(prev => ({ ...prev, footer_copyright: val })),
-                    social_instagram: (val: string) => setSettings(prev => ({ ...prev, social_instagram: val })),
-                    social_linkedin: (val: string) => setSettings(prev => ({ ...prev, social_linkedin: val })),
-                    social_twitter: (val: string) => setSettings(prev => ({ ...prev, social_twitter: val })),
-                    social_behance: (val: string) => setSettings(prev => ({ ...prev, social_behance: val })),
-                    works_section_title: (val: string) => setSettings(prev => ({ ...prev, works_section_title: val })),
-                    marquee_text: (val: string) => setSettings(prev => ({ ...prev, marquee_text: val })),
-                    marquee_speed: (val: string) => setSettings(prev => ({ ...prev, marquee_speed: val })),
-                    custom_cursor_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_url: val })),
-                    custom_cursor_hover_url: (val: string) => setSettings(prev => ({ ...prev, custom_cursor_hover_url: val })),
-                    cursor_size: (val: string) => setSettings(prev => ({ ...prev, cursor_size: val })),
-                    cursor_hover_size: (val: string) => setSettings(prev => ({ ...prev, cursor_hover_size: val }))
-                };
-
-                data.forEach((item: { key: string, value: string }) => {
-                    if (settingsMap[item.key as keyof typeof settingsMap] && typeof settingsMap[item.key as keyof typeof settingsMap] === 'function') {
-                        // Typescript might complain about function type matching, calling simply:
-                        (settingsMap[item.key as keyof typeof settingsMap] as any)(item.value);
+                        if (hasChanges) setSettings(newSettings);
                     }
-                    if (item.key === 'hero_elements_order') {
-                        try {
-                            setHeroOrder(JSON.parse(item.value));
-                        } catch (e) {
-                            console.error("Failed to parse hero order", e);
-                        }
-                    }
-                });
+                }
+            } catch (error) {
+                console.error("Error fetching settings:", error);
             }
             setLoading(false);
         };
 
         const fetchCustomFonts = async () => {
-            const { data } = await supabase
-                .from('custom_fonts')
-                .select('*')
-                .order('created_at', { ascending: true });
-
-            if (data) setCustomFonts(data);
+            try {
+                const res = await fetch('/api/custom-fonts');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCustomFonts(data);
+                }
+            } catch (error) {
+                console.error("Error fetching fonts:", error);
+            }
         };
 
         fetchSettings();
@@ -259,6 +201,15 @@ export default function SettingsPage() {
         </>
     );
 
+    const saveSettingsToApi = async (updates: { key: string, value: string }[]) => {
+        const res = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        });
+        if (!res.ok) throw new Error('Failed to save');
+    };
+
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -274,11 +225,7 @@ export default function SettingsPage() {
                 value: JSON.stringify(heroOrder)
             });
 
-            const { error } = await supabase
-                .from('site_settings')
-                .upsert(updates, { onConflict: 'key' });
-
-            if (error) throw error;
+            await saveSettingsToApi(updates);
             alert("Settings saved successfully!");
         } catch (error) {
             console.error(error);
@@ -288,35 +235,30 @@ export default function SettingsPage() {
         }
     };
 
+    // Generic upload handler
+    const uploadFile = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        return data.url;
+    };
+
     const handleCursorUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `cursor-${Date.now()}.${fileExt}`;
-            const filePath = `site-assets/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('project-assets')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // Persist immediately
-            const { error: dbError } = await supabase
-                .from('site_settings')
-                .upsert({ key: 'custom_cursor_url', value: publicUrl }, { onConflict: 'key' });
-
-            if (dbError) throw dbError;
+            const publicUrl = await uploadFile(file);
+            await saveSettingsToApi([{ key: 'custom_cursor_url', value: publicUrl }]);
 
             setSettings(prev => ({ ...prev, custom_cursor_url: publicUrl }));
             alert("Cursor updated successfully!");
-
         } catch (error: any) {
             console.error(error);
             alert(`Error uploading cursor: ${error.message || "Unknown error"}`);
@@ -331,25 +273,8 @@ export default function SettingsPage() {
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `cursor-hover-${Date.now()}.${fileExt}`;
-            const filePath = `site-assets/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('project-assets')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // Persist immediately
-            const { error: dbError } = await supabase
-                .from('site_settings')
-                .upsert({ key: 'custom_cursor_hover_url', value: publicUrl }, { onConflict: 'key' });
-
-            if (dbError) throw dbError;
+            const publicUrl = await uploadFile(file);
+            await saveSettingsToApi([{ key: 'custom_cursor_hover_url', value: publicUrl }]);
 
             setSettings(prev => ({ ...prev, custom_cursor_hover_url: publicUrl }));
             alert("Hover Cursor updated successfully!");
@@ -357,43 +282,6 @@ export default function SettingsPage() {
         } catch (error: any) {
             console.error(error);
             alert(`Error uploading hover cursor: ${error.message || "Unknown error"}`);
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const handleFontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setUploading(true);
-        try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `font-${Date.now()}.${fileExt}`;
-            const filePath = `site-assets/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('project-assets')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // Persist immediately
-            const { error: dbError } = await supabase
-                .from('site_settings')
-                .upsert({ key: 'custom_font_url', value: publicUrl }, { onConflict: 'key' });
-
-            if (dbError) throw dbError;
-
-            setSettings(prev => ({ ...prev, custom_font_url: publicUrl }));
-            alert("Custom Font uploaded successfully! Please refresh the page to see changes.");
-
-        } catch (error: any) {
-            console.error(error);
-            alert(`Error uploading font: ${error.message || "Unknown error"}`);
         } finally {
             setUploading(false);
         }
@@ -411,40 +299,24 @@ export default function SettingsPage() {
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `custom-font-${Date.now()}.${fileExt}`;
-            const filePath = `site-assets/fonts/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('project-assets')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // Generate unique font-family class
+            const publicUrl = await uploadFile(file);
             const fontFamily = `font-custom-${Date.now()}`;
 
-            // Save to custom_fonts table
-            const { error: dbError } = await supabase
-                .from('custom_fonts')
-                .insert({
+            const res = await fetch('/api/custom-fonts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     name: fontName.trim(),
                     font_url: publicUrl,
                     font_family: fontFamily
-                });
+                })
+            });
 
-            if (dbError) throw dbError;
+            if (!res.ok) throw new Error('Failed to save font');
 
-            // Refresh custom fonts list
-            const { data: fontsData } = await supabase
-                .from('custom_fonts')
-                .select('*')
-                .order('created_at', { ascending: true });
-
-            if (fontsData) setCustomFonts(fontsData);
+            // Refresh fonts
+            const fontsRes = await fetch('/api/custom-fonts');
+            if (fontsRes.ok) setCustomFonts(await fontsRes.json());
 
             alert(`Font "${fontName}" uploaded successfully!`);
 
@@ -460,12 +332,8 @@ export default function SettingsPage() {
         if (!confirm(`Are you sure you want to delete "${fontName}"?`)) return;
 
         try {
-            const { error } = await supabase
-                .from('custom_fonts')
-                .delete()
-                .eq('id', fontId);
-
-            if (error) throw error;
+            const res = await fetch(`/api/custom-fonts?id=${fontId}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete');
 
             setCustomFonts(customFonts.filter(f => f.id !== fontId));
             alert(`Font "${fontName}" deleted successfully!`);
@@ -482,26 +350,8 @@ export default function SettingsPage() {
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `homepage-video-${Date.now()}.${fileExt}`;
-            const filePath = `site-assets/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('project-assets')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // Update local state handles the UI updates, save will persist it or we persist immediately?
-            // Let's persist immediately for video upload to match previous UX
-            const { error: dbError } = await supabase
-                .from('site_settings')
-                .upsert({ key: 'homepage_video_url', value: publicUrl }, { onConflict: 'key' });
-
-            if (dbError) throw dbError;
+            const publicUrl = await uploadFile(file);
+            await saveSettingsToApi([{ key: 'homepage_video_url', value: publicUrl }]);
 
             setSettings(prev => ({ ...prev, homepage_video_url: publicUrl }));
             alert("Video updated successfully!");
@@ -973,7 +823,7 @@ export default function SettingsPage() {
                                         onClick={() => handleDeleteCustomFont(font.id, font.name)}
                                         className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors"
                                     >
-                                        Delete
+                                        <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
                             ))}

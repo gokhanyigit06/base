@@ -7,25 +7,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
 
 export default function WorksPage() {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [projects, setProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Fetch Projects from Supabase
+    // Fetch Projects from Local API
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                if (data) setProjects(data);
-
+                const res = await fetch('/api/projects');
+                if (res.ok) {
+                    const data = await res.json();
+                    setProjects(data);
+                }
             } catch (error) {
                 console.error("Error fetching projects:", error);
             } finally {

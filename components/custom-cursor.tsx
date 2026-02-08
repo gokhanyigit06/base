@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
 
 export function CustomCursor() {
     const pathname = usePathname();
@@ -42,19 +41,20 @@ export function CustomCursor() {
         if (isMobile) return; // Tiny optimization: Don't fetch/listen if mobile
 
         const fetchCursor = async () => {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('key, value')
-                .in('key', ['custom_cursor_url', 'custom_cursor_hover_url', 'cursor_size', 'cursor_hover_size']);
-
-            if (data) {
-                data.forEach(item => {
-                    if (item.key === 'custom_cursor_url') setCursorUrl(item.value);
-                    if (item.key === 'custom_cursor_hover_url') setHoverCursorUrl(item.value);
-                    if (item.key === 'cursor_size') setCursorSize(item.value);
-                    if (item.key === 'cursor_hover_size') setHoverCursorSize(item.value);
-                });
-            }
+            try {
+                const res = await fetch('/api/settings');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        data.forEach((item: any) => {
+                            if (item.key === 'custom_cursor_url') setCursorUrl(item.value);
+                            if (item.key === 'custom_cursor_hover_url') setHoverCursorUrl(item.value);
+                            if (item.key === 'cursor_size') setCursorSize(item.value);
+                            if (item.key === 'cursor_hover_size') setHoverCursorSize(item.value);
+                        });
+                    }
+                }
+            } catch (e) { console.error('Error fetching cursor settings:', e); }
         };
         fetchCursor();
 
@@ -129,4 +129,3 @@ body, a, button, input, select, textarea {
         </>
     );
 }
-
