@@ -41,14 +41,14 @@ export function SiteFooter({ initialSettings = {} }: SiteFooterProps) {
             <div className="max-w-screen-2xl mx-auto flex flex-col">
 
                 {/* Upper: Big CTA */}
-                <div className="flex flex-col gap-8 mb-24">
+                <div className="flex flex-col gap-8 mb-24 items-center text-center">
                     <h2
                         className={`text-[12vw] leading-[0.8] font-bold uppercase tracking-tighter ${ctaText1Font}`}
                         style={{ color: ctaText1Color }}
                     >
                         {ctaText1}
                     </h2>
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-12">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 w-full">
                         <h2
                             className={`text-[12vw] leading-[0.8] font-bold uppercase tracking-tighter ${ctaText2Font}`}
                             style={{ color: ctaText2Color }}

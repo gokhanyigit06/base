@@ -17,15 +17,16 @@ export function SiteHeader({ theme = "dark", forceDarkBackground = false }: { th
 
     const navLinks = [
         { title: "work", href: "/works" },
-        { title: "services", href: "#" },
         { title: "about", href: "/about" },
     ];
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
         <motion.header
             className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 transition-all duration-300 ease-in-out ${isScrolled
                 ? `h-20 ${theme === 'light' ? 'bg-white/80' : 'bg-black/80'} backdrop-blur-md`
-                : `h-24 ${forceDarkBackground ? 'bg-black/20 backdrop-blur-sm' : 'bg-transparent'}`
+                : `h-24 ${forceDarkBackground ? 'bg-black/80 backdrop-blur-sm' : 'bg-transparent'}`
                 }`}
             initial={{ y: -100 }}
             animate={{ y: 0 }}
@@ -46,7 +47,7 @@ export function SiteHeader({ theme = "dark", forceDarkBackground = false }: { th
                 </Link>
             </div>
 
-            {/* Center: Navigation Links */}
+            {/* Center: Desktop Navigation Links */}
             <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-10">
                 {navLinks.map((link) => (
                     <Link
@@ -59,8 +60,8 @@ export function SiteHeader({ theme = "dark", forceDarkBackground = false }: { th
                 ))}
             </nav>
 
-            {/* Right: Contact Us Button */}
-            <div className="pr-12">
+            {/* Right: Desktop Contact Us Button */}
+            <div className="hidden md:block pr-12">
                 <Link
                     href="/contact"
                     className={`text-4xl font-medium lowercase transition-colors duration-300 ${theme === 'light' ? 'text-blue-600' : 'text-blue-400 hover:text-blue-300'}`}
@@ -68,6 +69,54 @@ export function SiteHeader({ theme = "dark", forceDarkBackground = false }: { th
                     contact us
                 </Link>
             </div>
+
+            {/* Mobile Hamburger Button */}
+            <button
+                className={`md:hidden z-50 p-2 relative`}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+                <div className="w-8 h-8 flex flex-col justify-center gap-1.5 items-end">
+                    <motion.span
+                        animate={isMenuOpen ? { rotate: 45, y: 8, backgroundColor: "#ffffff" } : { rotate: 0, y: 0 }}
+                        className={`w-8 h-0.5 ${theme === 'light' && !isMenuOpen ? 'bg-black' : 'bg-white'} block origin-center`}
+                    />
+                    <motion.span
+                        animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                        className={`w-8 h-0.5 ${theme === 'light' && !isMenuOpen ? 'bg-black' : 'bg-white'} block`}
+                    />
+                    <motion.span
+                        animate={isMenuOpen ? { rotate: -45, y: -8, backgroundColor: "#ffffff" } : { rotate: 0, y: 0 }}
+                        className={`w-8 h-0.5 ${theme === 'light' && !isMenuOpen ? 'bg-black' : 'bg-white'} block origin-center`}
+                    />
+                </div>
+            </button>
+
+            {/* Mobile Menu Overlay */}
+            <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: isMenuOpen ? 0 : "100%" }}
+                transition={{ type: "tween", duration: 0.3 }}
+                className="fixed inset-0 z-40 bg-black text-white md:hidden flex flex-col items-center justify-center gap-8"
+            >
+                {navLinks.map((link) => (
+                    <Link
+                        key={link.title}
+                        href={link.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="text-5xl font-bold lowercase hover:text-brand-yellow transition-colors"
+                    >
+                        {link.title}
+                    </Link>
+                ))}
+
+                <Link
+                    href="/contact"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-5xl font-bold lowercase text-white hover:text-brand-yellow mt-8 decoration-2 underline underline-offset-8 decoration-brand-yellow"
+                >
+                    contact us
+                </Link>
+            </motion.div>
         </motion.header>
     );
 }
