@@ -59,7 +59,7 @@ export default function WorksPage() {
 
     return (
         <main className="min-h-screen bg-[#f2f2f2] text-black selection:bg-brand-yellow selection:text-black">
-            <SiteHeader />
+            <SiteHeader forceDarkBackground />
 
             <div className="pt-32 pb-40 px-6 md:px-12 max-w-[1920px] mx-auto">
 
@@ -70,25 +70,7 @@ export default function WorksPage() {
                         OUR WORKS
                     </h1>
 
-                    <div className="w-full xl:w-auto flex flex-col md:flex-row items-center gap-4 xl:pb-4">
-                        {/* Filter Dropdowns */}
-                        <div className="flex gap-4 w-full md:w-auto">
-                            <button className="flex items-center justify-between px-6 py-3 bg-transparent border border-black rounded-full min-w-[180px] hover:bg-black hover:text-white transition-colors group">
-                                <span className="font-mono text-sm uppercase">Type of Work</span>
-                                <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform" />
-                            </button>
-                        </div>
 
-                        {/* Search */}
-                        <div className="relative w-full md:w-[300px] border-b border-black/20 focus-within:border-black transition-colors">
-                            <input
-                                type="text"
-                                placeholder="Search work by client, type..."
-                                className="w-full py-3 pl-8 bg-transparent outline-none font-mono text-sm placeholder:text-gray-400"
-                            />
-                            <Search className="w-4 h-4 absolute left-0 top-1/2 -translate-y-1/2 text-gray-400" />
-                        </div>
-                    </div>
                 </div>
 
                 {/* WORKS GRID */}

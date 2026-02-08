@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, FolderPlus, Settings, LogOut, Package, Sparkles } from "lucide-react";
+import { LayoutDashboard, FolderPlus, Settings, LogOut, Package, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,7 +9,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const menu = [
         { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-
+        { title: "Clients", href: "/admin/dashboard/clients", icon: Users },
         { title: "New Project", href: "/admin/dashboard/projects/new", icon: FolderPlus },
         { title: "AI Studio", href: "/ai", icon: Sparkles },
         { title: "Settings", href: "/admin/dashboard/settings", icon: Settings },

@@ -2,6 +2,7 @@ import { SiteHeader } from "@/components/site-header";
 import { FeatureSection } from "@/components/feature-section";
 import { MarqueeSection } from "@/components/marquee-section";
 import { WorksSection } from "@/components/works-section";
+import { ClientsSection } from "@/components/clients-section";
 import { SloganSection } from "@/components/slogan-section";
 import { SiteFooter } from "@/components/site-footer";
 import { supabase } from "@/lib/supabase";
@@ -49,6 +50,9 @@ export default async function Home() {
 
       {/* Works Section Grid */}
       <WorksSection />
+
+      {/* Clients Section */}
+      <ClientsSection />
 
       {/* Slogan Section */}
       <SloganSection initialSettings={settings} />

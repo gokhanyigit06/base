@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useScroll, useTransform, motion, useMotionValueEvent } from "framer-motion"; // Added useMotionValueEvent
 import { useState } from "react";
 
-export function SiteHeader({ theme = "dark" }: { theme?: "light" | "dark" }) {
+export function SiteHeader({ theme = "dark", forceDarkBackground = false }: { theme?: "light" | "dark", forceDarkBackground?: boolean }) {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -25,7 +25,7 @@ export function SiteHeader({ theme = "dark" }: { theme?: "light" | "dark" }) {
         <motion.header
             className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 transition-all duration-300 ease-in-out ${isScrolled
                 ? `h-20 ${theme === 'light' ? 'bg-white/80' : 'bg-black/80'} backdrop-blur-md`
-                : 'h-24 bg-transparent'
+                : `h-24 ${forceDarkBackground ? 'bg-black/20 backdrop-blur-sm' : 'bg-transparent'}`
                 }`}
             initial={{ y: -100 }}
             animate={{ y: 0 }}
